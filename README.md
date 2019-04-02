@@ -1,4 +1,4 @@
-# Semidiscretization.jl
+# SemidiscretizationMethod.jl
 
 Julia package to investigate the behaviour of linear stochastic delay equations
 
