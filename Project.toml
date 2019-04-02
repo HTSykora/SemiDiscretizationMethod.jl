@@ -1,0 +1,6 @@
+authors = ["Henrik Sykora <henrik1991@gmail.com>"]
+name = "SemiDiscretizationMethod"
+uuid = "4c783bea-546c-11e9-3d67-69d22a3cafb7"
+version = "0.1.0"
+
+[deps]
