@@ -1,3 +1,8 @@
+authors = ["Henrik Sykora <henrik1991@gmail.com>"]
+name = "SemiDiscretizationMethod"
+uuid = "4c783bea-546c-11e9-3d67-69d22a3cafb7"
+version = "0.1.0"
+
 [deps]
 Arpack = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
 Lazy = "50d2b5c4-7a5e-59d5-8109-a42b560f39c0"

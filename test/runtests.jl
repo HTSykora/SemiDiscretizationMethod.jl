@@ -46,3 +46,4 @@ function tests()
         end
     end
 end
+tests()
