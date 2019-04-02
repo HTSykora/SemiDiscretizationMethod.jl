@@ -6,7 +6,7 @@ This package provides a tool to approximate the stability properties and station
 
 <!-- $$\dot{\mathbf{x}}(t) = \mathbf{A}(t) \mathbf{x}(t) + \sum_{j=1}^g \mathbf{B}(t) \mathbf{x}(t-\tau_j(t))+\mathbf{c}(t)$$ -->
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\dot{\mathbf{x}}(t)&space;=&space;\mathbf{A}(t)&space;\mathbf{x}(t)&space;&plus;&space;\sum_{j=1}^g&space;\mathbf{B}(t)&space;\mathbf{x}(t-\tau_j(t))&plus;\mathbf{c}(t)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\dot{\mathbf{x}}(t)&space;=&space;\mathbf{A}(t)&space;\mathbf{x}(t)&space;&plus;&space;\sum_{j=1}^g&space;\mathbf{B}(t)&space;\mathbf{x}(t-\tau_j(t))&plus;\mathbf{c}(t)" title="\dot{\mathbf{x}}(t) = \mathbf{A}(t) \mathbf{x}(t) + \sum_{j=1}^g \mathbf{B}(t) \mathbf{x}(t-\tau_j(t))+\mathbf{c}(t)" /></a>
+<img src="https://latex.codecogs.com/gif.latex?\dot{\mathbf{x}}(t)&space;=&space;\mathbf{A}(t)&space;\mathbf{x}(t)&space;&plus;&space;\sum_{j=1}^g&space;\mathbf{B}(t)&space;\mathbf{x}(t-\tau_j(t))&plus;\mathbf{c}(t)" title="\dot{\mathbf{x}}(t) = \mathbf{A}(t) \mathbf{x}(t) + \sum_{j=1}^g \mathbf{B}(t) \mathbf{x}(t-\tau_j(t))+\mathbf{c}(t)" />
 
 by transforming the underlying differential equation into the mapping:
 <!-- $$\mathbf{y}_{n+1} = \mathbf{F}_n\mathbf{y}_n+\mathbf{f}_n,$$ -->
@@ -16,7 +16,7 @@ by transforming the underlying differential equation into the mapping:
 where <!-- $n$ -->
 <a href="https://www.codecogs.com/eqnedit.php?latex=n" target="_blank"><img src="https://latex.codecogs.com/gif.latex?n" title="n" /></a>
 is the discrete time <!-- ($t_n = n \Delta t$) -->
-(<a href="https://www.codecogs.com/eqnedit.php?latex=t_n&space;=&space;n&space;\Delta&space;t" target="_blank"><img src="https://latex.codecogs.com/gif.latex?t_n&space;=&space;n&space;\Delta&space;t" title="t_n = n \Delta t" /></a>)
+<a href="https://www.codecogs.com/eqnedit.php?latex=(t_n&space;=&space;n&space;\Delta&space;t)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(t_n&space;=&space;n&space;\Delta&space;t)" title="(t_n = n \Delta t)" /></a>
 , <!-- $\mathbf{F}_n$ -->
 <a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{F}_n" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{F}_n" title="\mathbf{F}_n" /></a>
  is the mapping matrix constructed using <!-- $\mathbf{A}(t)$ -->
@@ -34,7 +34,8 @@ is the discretized state space vector:
 
 Each coefficient matrices of delay differential equations are periodic, with a principle period of <!-- $P$ -->
 <a href="https://www.codecogs.com/eqnedit.php?latex=P" target="_blank"><img src="https://latex.codecogs.com/gif.latex?P" title="P" /></a>
-, namely:<!-- $A(t)=A(t+P),\; B_j(t)=B_j(t+P),\; \tau_j(t)=\tau_j(t+P)$) and $c(t)=c(t+P)$ -->
+, namely:
+<!-- $A(t)=A(t+P),\; B_j(t)=B_j(t+P),\; \tau_j(t)=\tau_j(t+P)$) and $c(t)=c(t+P)$ -->
 <a href="https://www.codecogs.com/eqnedit.php?latex=A(t)=A(t+P),\; B_j(t)=B_j(t+P),\; \tau_j(t)=\tau_j(t+P)$) and $c(t)=c(t+P)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?A(t)=A(t+P),\; B_j(t)=B_j(t+P),\; \tau_j(t)=\tau_j(t+P)$) and $c(t)=c(t+P)" title="A(t)=A(t+P),\; B_j(t)=B_j(t+P),\; \tau_j(t)=\tau_j(t+P)$) and $c(t)=c(t+P)" /></a>
 .  
 Furthermore, the integer <!-- $r$ -->
@@ -142,7 +143,9 @@ Here
 \quad \mathbf{B}_1(t) = \begin{bmatrix}0 & 0 \\ b_0 & 0\end{bmatrix},
 \quad \tau_1(t) \equiv 2\pi, 
 \quad \text{and} \quad \mathbf{c}(t) = \begin{bmatrix} 0 \\ \sin(2t) \end{bmatrix}.$$ -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{x}(t)&space;=&space;\begin{bmatrix}x(t)&space;\\&space;\dot{x}(t)\end{bmatrix},&space;\quad&space;\mathbf{A}(t)&space;=&space;\begin{bmatrix}&space;0&space;&&space;1&space;\\&space;-\delta&space;-&space;\varepsilon&space;\cos(t)&space;&&space;-a_1&space;\end{bmatrix},&space;\quad&space;\mathbf{B}_1(t)&space;=&space;\begin{bmatrix}0&space;&&space;0&space;\\&space;b_0&space;&&space;0\end{bmatrix},&space;\quad&space;\tau_1(t)&space;\equiv&space;2\pi,&space;\quad&space;\text{and}&space;\quad&space;\mathbf{c}(t)&space;=&space;\begin{bmatrix}&space;0&space;\\&space;\sin(2t)&space;\end{bmatrix}." target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{x}(t)&space;=&space;\begin{bmatrix}x(t)&space;\\&space;\dot{x}(t)\end{bmatrix},&space;\quad&space;\mathbf{A}(t)&space;=&space;\begin{bmatrix}&space;0&space;&&space;1&space;\\&space;-\delta&space;-&space;\varepsilon&space;\cos(t)&space;&&space;-a_1&space;\end{bmatrix},&space;\quad&space;\mathbf{B}_1(t)&space;=&space;\begin{bmatrix}0&space;&&space;0&space;\\&space;b_0&space;&&space;0\end{bmatrix},&space;\quad&space;\tau_1(t)&space;\equiv&space;2\pi,&space;\quad&space;\text{and}&space;\quad&space;\mathbf{c}(t)&space;=&space;\begin{bmatrix}&space;0&space;\\&space;\sin(2t)&space;\end{bmatrix}." title="\mathbf{x}(t) = \begin{bmatrix}x(t) \\ \dot{x}(t)\end{bmatrix}, \quad \mathbf{A}(t) = \begin{bmatrix} 0 & 1 \\ -\delta - \varepsilon \cos(t) & -a_1 \end{bmatrix}, \quad \mathbf{B}_1(t) = \begin{bmatrix}0 & 0 \\ b_0 & 0\end{bmatrix}, \quad \tau_1(t) \equiv 2\pi, \quad \text{and} \quad \mathbf{c}(t) = \begin{bmatrix} 0 \\ \sin(2t) \end{bmatrix}." /></a>
+<img src="https://latex.codecogs.com/gif.latex?\mathbf{x}(t)&space;=&space;\begin{bmatrix}x(t)&space;\\&space;\dot{x}(t)\end{bmatrix},&space;\quad&space;\mathbf{A}(t)&space;=&space;\begin{bmatrix}&space;0&space;&&space;1&space;\\&space;-\delta&space;-&space;\varepsilon&space;\cos(t)&space;&&space;-a_1&space;\end{bmatrix},&space;\quad&space;\mathbf{B}_1(t)&space;=&space;\begin{bmatrix}0&space;&&space;0&space;\\&space;b_0&space;&&space;0\end{bmatrix}," title="\mathbf{x}(t) = \begin{bmatrix}x(t) \\ \dot{x}(t)\end{bmatrix}, \quad \mathbf{A}(t) = \begin{bmatrix} 0 & 1 \\ -\delta - \varepsilon \cos(t) & -a_1 \end{bmatrix}, \quad \mathbf{B}_1(t) = \begin{bmatrix}0 & 0 \\ b_0 & 0\end{bmatrix}," />  
+<br>
+<img src="https://latex.codecogs.com/gif.latex?\tau_1(t)&space;\equiv&space;2\pi,&space;\quad&space;\text{and}&space;\quad&space;\mathbf{c}(t)&space;=&space;\begin{bmatrix}&space;0&space;\\&space;\sin(2t)&space;\end{bmatrix}." title="\tau_1(t) \equiv 2\pi, \quad \text{and} \quad \mathbf{c}(t) = \begin{bmatrix} 0 \\ \sin(2t) \end{bmatrix}." />
 
 (Page 77 of the book)
 
