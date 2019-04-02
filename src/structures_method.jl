@@ -4,7 +4,7 @@ abstract type DiscretizationMethod{fT} end
 struct FullDiscretization{fT} <: DiscretizationMethod{fT} 
     Δt::fT; # Time resolution of the discretisation
 end
-FullDiscretization(Δt) = new(Δt)terms(::FullDiscretization) = 1
+terms(::FullDiscretization) = 1
 methodorder(::FullDiscretization) = 0
 
 # Semi-Discretization
