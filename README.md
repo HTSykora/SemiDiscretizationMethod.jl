@@ -37,11 +37,10 @@ Each coefficient matrices of delay differential equations are periodic, with a p
 <a href="https://www.codecogs.com/eqnedit.php?latex=P" target="_blank"><img src="https://latex.codecogs.com/gif.latex?P" title="P" /></a>
 , namely:
 <!-- $A(t)=A(t+P),\; B_j(t)=B_j(t+P),\; \tau_j(t)=\tau_j(t+P)$) and $c(t)=c(t+P)$ -->
-<img src="https://latex.codecogs.com/gif.latex?A(t)=A(t&plus;P),\;&space;B_j(t)=B_j(t&plus;P),\;&space;\tau_j(t)=\tau_j(t&plus;P)$)&space;and&space;$c(t)=c(t&plus;P)" title="A(t)=A(t+P),\; B_j(t)=B_j(t+P),\; \tau_j(t)=\tau_j(t+P)$) and $c(t)=c(t+P)" />
-.  
+<img src="https://latex.codecogs.com/gif.latex?A(t)=A(t&plus;P),\;&space;B_j(t)=B_j(t&plus;P),\;&space;\tau_j(t)=\tau_j(t&plus;P)$)&space;and&space;$c(t)=c(t&plus;P)." title="A(t)=A(t+P),\; B_j(t)=B_j(t+P),\; \tau_j(t)=\tau_j(t+P)$) and $c(t)=c(t+P)." />
 Furthermore, the integer <!-- $r$ -->
 <a href="https://www.codecogs.com/eqnedit.php?latex=r" target="_blank"><img src="https://latex.codecogs.com/gif.latex?r" title="r" /></a>
- is chosen in a way, that <!-- $r\Delta t\geq \max_{t \in \left[0,P\right],j=1\ldots g}\tau_j(t)$ -->
+is chosen in a way, that <!-- $r\Delta t\geq \max_{t \in \left[0,P\right],j=1\ldots g}\tau_j(t)$ -->
 <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;r\Delta&space;t\geq&space;\max_{t&space;\in&space;\left[0,P\right],j=1\ldots&space;g}\tau_j(t)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;r\Delta&space;t\geq&space;\max_{t&space;\in&space;\left[0,P\right],j=1\ldots&space;g}\tau_j(t)" title="r\Delta t\geq \max_{t \in \left[0,P\right],j=1\ldots g}\tau_j(t)" /></a>
  (the discretized "history function" contains all possible delayed values).  
 
@@ -57,7 +56,7 @@ With the use of the discrete mapping, the stability of the original system can b
     >1 & \Rightarrow & \text{the mapping is unstable}
     \end{matrix}
     \right.$$ -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=\rho\left(\prod_{i=0}^{p-1}\mathbf{F}_{n&plus;i}\right)\left\{&space;\begin{matrix}&space;<1&space;&&space;\Rightarrow&space;&&space;\text{the&space;mapping&space;is&space;stable}\\&space;>1&space;&&space;\Rightarrow&space;&&space;\text{the&space;mapping&space;is&space;unstable}&space;\end{matrix}&space;\right." target="_blank"><img src="https://latex.codecogs.com/gif.latex?\rho\left(\prod_{i=0}^{p-1}\mathbf{F}_{n&plus;i}\right)\left\{&space;\begin{matrix}&space;<1&space;&&space;\Rightarrow&space;&&space;\text{the&space;mapping&space;is&space;stable}\\&space;>1&space;&&space;\Rightarrow&space;&&space;\text{the&space;mapping&space;is&space;unstable}&space;\end{matrix}&space;\right." title="\rho\left(\prod_{i=0}^{p-1}\mathbf{F}_{n+i}\right)\left\{ \begin{matrix} <1 & \Rightarrow & \text{the mapping is stable}\\ >1 & \Rightarrow & \text{the mapping is unstable} \end{matrix} \right." /></a>
+<img src="https://latex.codecogs.com/gif.latex?\rho\left(\mathbf{F}_{n&plus;p-1}\cdot\mathbf{F}_{n&plus;p-2}\cdot\ldots\cdot\mathbf{F}_{n}\right)\left\{&space;\begin{matrix}&space;<1&space;&&space;\Rightarrow&space;&&space;\text{the&space;mapping&space;is&space;stable}\\&space;>1&space;&&space;\Rightarrow&space;&&space;\text{the&space;mapping&space;is&space;unstable}&space;\end{matrix}&space;\right." title="\rho\left(\mathbf{F}_{n+p-1}\cdot\mathbf{F}_{n+p-2}\cdot\ldots\cdot\mathbf{F}_{n}\right)\left\{ \begin{matrix} <1 & \Rightarrow & \text{the mapping is stable}\\ >1 & \Rightarrow & \text{the mapping is unstable} \end{matrix} \right." />
 
 Furthermore, the stationary solution can be determined by the periodic fix point (stationary orbit) of the mapping.
 # Citing
