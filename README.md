@@ -1,6 +1,7 @@
 # SemidiscretizationMethod.jl
 
-Julia package to investigate the behaviour of linear stochastic delay equations
+Julia package to investigate the behaviour of linear delay differential equations based on the book 
+[Semi-Discretization for Time-Delay Systems (by Insperger and Stepan)](http://link.springer.com/10.1007/978-1-4614-0335-7).
 
 This package provides a tool to approximate the stability properties and stationary behaviour of linear periodic delay systems of the form:
 
@@ -61,10 +62,22 @@ With the use of the discrete mapping, the stability of the original system can b
 Furthermore, the stationary solution can be determined by the periodic fix point (stationary orbit) of the mapping.
 # Citing
 
-The package is based on the book 
-[Semi-Discretization for Time-Delay Systems (by Insperger and Stepan)](https://www.springer.com/cn/book/9781461403340).
+If you use this package as part of your research, teaching, or other activities, we would be grateful if you could cite the book it is based on (BibTeX entry):
+```
+@book{Insperger2011,
+address = {New York, NY},
+author = {Insperger, Tam{\'{a}}s and St{\'{e}}p{\'{a}}n, G{\'{a}}bor},
+doi = {10.1007/978-1-4614-0335-7},
+isbn = {978-1-4614-0334-0},
+publisher = {Springer New York},
+series = {Applied Mathematical Sciences},
+title = {{Semi-Discretization for Time-Delay Systems}},
+url = {http://link.springer.com/10.1007/978-1-4614-0335-7},
+volume = {178},
+year = {2011}
+}
+```
 
- If you use this package as part of your research, teaching, or other activities, we would be grateful if you could cite it.
 # Examples
 ## Hayes equations
 <!-- $$\dot{x}(t) = a \,x(t) + b \,x(t-1) + 1,$$ -->
