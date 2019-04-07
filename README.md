@@ -1,4 +1,4 @@
-# SemidiscretizationMethod.jl
+# SemiDiscretizationMethod.jl
 
 Julia package to investigate the behaviour of linear delay differential equations based on the book 
 [Semi-Discretization for Time-Delay Systems (by Insperger and Stepan)](http://link.springer.com/10.1007/978-1-4614-0335-7).
@@ -77,7 +77,12 @@ year = {2011}
 }
 ```
 
-# Examples
+# Usage with examples
+## Installation
+```julia
+julia> ] add SemiDiscretizationMethod
+```
+
 ## Hayes equations
 <!-- $$\dot{x}(t) = a \,x(t) + b \,x(t-1) + 1,$$ -->
 <a href="https://www.codecogs.com/eqnedit.php?latex=\dot{x}(t)&space;=&space;a&space;\,x(t)&space;&plus;&space;b&space;\,x(t-1)&space;&plus;&space;1," target="_blank"><img src="https://latex.codecogs.com/gif.latex?\dot{x}(t)&space;=&space;a&space;\,x(t)&space;&plus;&space;b&space;\,x(t-1)&space;&plus;&space;1." title="\dot{x}(t) = a \,x(t) + b \,x(t-1) + 1." /></a>
