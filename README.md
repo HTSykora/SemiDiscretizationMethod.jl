@@ -177,12 +177,12 @@ end;
 ```
 ```julia
 τmax=2π # the largest τ of the system
-T=2π #Principle period of the system (sin(t)=sin(t+P)) 
-mathieu_lddep=createMathieuProblem(3.,2.,-0.15,0.1,T=T); # LDDE problem for Hayes equation
+P=2π #Principle period of the system (sin(t)=sin(t+P)) 
+mathieu_lddep=createMathieuProblem(3.,2.,-0.15,0.1,T=P); # LDDE problem for Hayes equation
 method=SemiDiscretization(1,0.01) # 3rd order semi discretization with Δt=0.1
 # if P = τmax, then n_steps is automatically calculated
 mapping=calculateMapping(mathieu_lddep,method,τmax,
-    n_steps=Int((T+100eps(T))÷method.Δt),calculate_additive=true); #The discrete mapping of the system
+    n_steps=Int((P+100eps(P))÷method.Δt),calculate_additive=true); #The discrete mapping of the system
 
 @show spectralRadiusOfMapping(mapping); # spectral radius ρ of the mapping matrix (ρ>1 unstable, ρ<1 stable)
 # spectralRadiusOfMapping(mapping) = 0.5131596340374617
