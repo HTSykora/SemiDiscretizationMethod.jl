@@ -114,7 +114,7 @@ end
 hayes_lddep=createHayesProblem(-1.,-1.); # LDDE problem for Hayes equation
 method=SemiDiscretization(1,0.1) # 3rd order semi discretization with Δt=0.1
 τmax=1. # the largest τ of the system
-mapping=DiscreteMapping_1step(hayes_lddep,method,τmax,n_steps=1,calculate_additive=true); #The discrete mapping of the system
+mapping=DiscreteMapping(hayes_lddep,method,τmax,n_steps=1,calculate_additive=true); #The discrete mapping of the system
 ```
 
 ```julia
@@ -136,7 +136,7 @@ using LaTeXStrings
 method=SemiDiscretization(4,0.1);
 τmax=1.
 
-foo(a,b) = log(spectralRadiusOfMapping(DiscreteMapping_1step(createHayesProblem(a,b),method,τmax,
+foo(a,b) = log(spectralRadiusOfMapping(DiscreteMapping(createHayesProblem(a,b),method,τmax,
     n_steps=1))); # No additive term calculated
 
 axis=[Axis(-15.0:15.,:a),
@@ -181,7 +181,7 @@ P=2π #Principle period of the system (sin(t)=sin(t+P))
 mathieu_lddep=createMathieuProblem(3.,2.,-0.15,0.1,T=P); # LDDE problem for Hayes equation
 method=SemiDiscretization(1,0.01) # 3rd order semi discretization with Δt=0.1
 # if P = τmax, then n_steps is automatically calculated
-mapping=DiscreteMapping_1step(mathieu_lddep,method,τmax,
+mapping=DiscreteMapping(mathieu_lddep,method,τmax,
     n_steps=Int((P+100eps(P))÷method.Δt),calculate_additive=true); #The discrete mapping of the system
 
 @show spectralRadiusOfMapping(mapping); # spectral radius ρ of the mapping matrix (ρ>1 unstable, ρ<1 stable)
@@ -206,7 +206,7 @@ a1=0.1;
 T=1π;
 method=SemiDiscretization(2,T/40);
 
-foo(δ,b0) = log(spectralRadiusOfMapping(DiscreteMapping_1step(createMathieuProblem(δ,ε,b0,a1,T=T),method,τmax,
+foo(δ,b0) = log(spectralRadiusOfMapping(DiscreteMapping(createMathieuProblem(δ,ε,b0,a1,T=T),method,τmax,
     n_steps=Int((T+100eps(T))÷method.Δt)))); # No additive term calculated
 
 axis=[Axis(-1:0.2:5.,:δ),
