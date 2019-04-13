@@ -21,7 +21,7 @@ ProportionalMX,
 Delay,DelayMX,
 Additive,
 LDDEProblem,
-calculateMapping_allsteps, calculateMapping,
+DiscreteMapping, DiscreteMapping_1step,
 fixPointOfMapping, spectralRadiusOfMapping
 
 end # module

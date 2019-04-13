@@ -43,7 +43,7 @@ end
 ############################## Discrete Mapping ###############################
 ###############################################################################
 # For every time step
-function calculateMapping_allsteps(LDDEP::AbstractLDDEProblem, method::DiscretizationMethod, DiscretizationLength::Real; n_steps::Int64=nStepOfLength(DiscretizationLength, method.Δt), calculate_additive::Bool=false)
+function DiscreteMapping(LDDEP::AbstractLDDEProblem, method::DiscretizationMethod, DiscretizationLength::Real; n_steps::Int64=nStepOfLength(DiscretizationLength, method.Δt), calculate_additive::Bool=false)
     result = calculateResults(LDDEP, method, DiscretizationLength,n_steps = n_steps, calculate_additive = calculate_additive);
     DiscreteMapping(DiscreteMappingSteps(result)...)
 end
@@ -60,7 +60,7 @@ function DiscreteMappingSteps(rst::AbstractResult{d}) where d
 end
 
 # If not all state space values are needed
-function calculateMapping_allsteps(LDDEP::AbstractLDDEProblem, method::DiscretizationMethod, DiscretizationLength::Real, idxs::AbstractVector{<:Integer}; n_steps::Int64=nStepOfLength(DiscretizationLength, method.Δt), calculate_additive::Bool=false)
+function DiscreteMapping(LDDEP::AbstractLDDEProblem, method::DiscretizationMethod, DiscretizationLength::Real, idxs::AbstractVector{<:Integer}; n_steps::Int64=nStepOfLength(DiscretizationLength, method.Δt), calculate_additive::Bool=false)
     result = calculateResults(LDDEP, method, DiscretizationLength,n_steps = n_steps, calculate_additive = calculate_additive);
     DiscreteMapping(DiscreteMappingSteps(result, idxs)...)
 end
@@ -78,8 +78,8 @@ end
 ###############################################################################
 ############################# Calculate Functions #############################
 ###############################################################################
-function calculateMapping(LDDEP::AbstractLDDEProblem, method::DiscretizationMethod, DiscretizationLength::Real; n_steps::Int64=nStepOfLength(DiscretizationLength, method.Δt), calculate_additive::Bool=false)
-    mp=calculateMapping_allsteps(LDDEP, method, DiscretizationLength,n_steps = n_steps, calculate_additive = calculate_additive);
+function DiscreteMapping_1step(LDDEP::AbstractLDDEProblem, method::DiscretizationMethod, DiscretizationLength::Real; n_steps::Int64=nStepOfLength(DiscretizationLength, method.Δt), calculate_additive::Bool=false)
+    mp=DiscreteMapping(LDDEP, method, DiscretizationLength,n_steps = n_steps, calculate_additive = calculate_additive);
     result = initializeOneStepMapping(mp);
     result.ts .= [mp.ts[1],mp.ts[end]];
     result.mappingMXs[1] = prodl(mp.mappingMXs);
@@ -90,8 +90,8 @@ function calculateMapping(LDDEP::AbstractLDDEProblem, method::DiscretizationMeth
 end
 
 # If not all state space values are needed
-function calculateMapping(LDDEP::AbstractLDDEProblem, method::DiscretizationMethod, DiscretizationLength::Real, idxs::AbstractVector{<:Integer}; n_steps::Int64=nStepOfLength(DiscretizationLength, method.Δt), calculate_additive::Bool=false)
-    mp=calculateMapping_allsteps(LDDEP, method, DiscretizationLength,n_steps = n_steps, calculate_additive = calculate_additive);
+function DiscreteMapping_1step(LDDEP::AbstractLDDEProblem, method::DiscretizationMethod, DiscretizationLength::Real, idxs::AbstractVector{<:Integer}; n_steps::Int64=nStepOfLength(DiscretizationLength, method.Δt), calculate_additive::Bool=false)
+    mp=DiscreteMapping(LDDEP, method, DiscretizationLength,n_steps = n_steps, calculate_additive = calculate_additive);
     result = initializeOneStepMapping(mp);
     result.ts .= [mp.ts[1],mp.ts[end]];
     result.mappingMXs[1] = prodl(mp.mappingMXs,idxs);

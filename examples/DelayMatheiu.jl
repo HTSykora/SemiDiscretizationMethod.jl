@@ -13,7 +13,7 @@ T=2π #Principle period of the system (sin(t)=sin(t+P))
 mathieu_lddep=createMathieuProblem(3.,2.,-0.15,0.1,T=T); # LDDE problem for Hayes equation
 method=SemiDiscretization(1,0.01) # 3rd order semi discretization with Δt=0.1
 # if P = τmax, then n_steps is automatically calculated
-mapping=calculateMapping(mathieu_lddep,method,τmax,
+mapping=DiscreteMapping_1step(mathieu_lddep,method,τmax,
     n_steps=Int((T+100eps(T))÷method.Δt),calculate_additive=true); #The discrete mapping of the system
 
 @show spectralRadiusOfMapping(mapping); # spectral radius ρ of the mapping matrix (ρ>1 unstable, ρ<1 stable)
@@ -48,7 +48,7 @@ a1=0.1;
 T=1π;
 method=SemiDiscretization(2,T/40);
 
-foo(δ,b0) = log(spectralRadiusOfMapping(calculateMapping(createMathieuProblem(δ,ε,b0,a1,T=T),method,τmax,
+foo(δ,b0) = log(spectralRadiusOfMapping(DiscreteMapping_1step(createMathieuProblem(δ,ε,b0,a1,T=T),method,τmax,
     n_steps=Int((T+100eps(T))÷method.Δt)))); # No additive term calculated
 
 axis=[Axis(-1:0.2:5.,:δ),
