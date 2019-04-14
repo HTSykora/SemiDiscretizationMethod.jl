@@ -31,7 +31,7 @@ ProportionalMX(mx::mxT) where mxT <: Function = ProportionalMX{size(mx(0.), 1),m
 ProportionalMX(mx::mxT) where mxT <: SMatrix = ProportionalMX{size(mx, 1),mxT}(mx)
 ProportionalMX(mx::mxT) where mxT <: AbstractMatrix{<:Real} = ProportionalMX(SMatrix{size(mx)...}(mx))
 (PMX::ProportionalMX{d,<:Function})(t) where d = PMX.MX(t)
-(PMX::ProportionalMX{d,<:Matrix{<:Real}})(t) where d = PMX.MX
+(PMX::ProportionalMX{d,<:AbstractMatrix{<:Real}})(t) where d = PMX.MX
 Base.convert(::Type{ProportionalMX}, mx::mT) where mT <: AbstractMatrix{<:Real} = ProportionalMX(mx)
 
 struct DelayMX{d,dT,bT} <: CoefficientMatrix{d}
