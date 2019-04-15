@@ -24,7 +24,7 @@ function tests()
             hayes_lddep=createHayesProblem(-1.,-1.); # LDDE problem for Hayes equation
 			method=SemiDiscretization(1,0.1) # 3rd order semi discretization with Δt=0.1
 			τmax=1. # the largest τ of the system
-			mapping=DiscreteMapping_1step(hayes_lddep,method,τmax,n_steps=1,calculate_additive=true); #The discrete mapping of the system
+			mapping=DiscreteMapping(hayes_lddep,method,τmax,n_steps=1,calculate_additive=true); #The discrete mapping of the system
 			spectralRadiusOfMapping(mapping)
 			fixPointOfMapping(mapping)
             true
@@ -36,7 +36,7 @@ function tests()
 			mathieu_lddep=createMathieuProblem(3.,2.,-0.15,0.1,T=T); # LDDE problem for Hayes equation
 			method=SemiDiscretization(1,0.01) # 3rd order semi discretization with Δt=0.1
 			# if P = τmax, then n_steps is automatically calculated
-			mapping=DiscreteMapping_1step(mathieu_lddep,method,τmax,
+			mapping=DiscreteMapping(mathieu_lddep,method,τmax,
 		    n_steps=Int((T+100eps(T))÷method.Δt),calculate_additive=true); #The discrete mapping of the system
 
 			spectralRadiusOfMapping(mapping); # spectral radius ρ of the mapping matrix (ρ>1 unstable, ρ<1 stable)
