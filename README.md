@@ -77,6 +77,8 @@ year = {2011}
 }
 ```
 
+If you are interested in the behaviour of your linear delay model in the presence of Gaussian white noise, please consider the [StochasticSemiDiscretizationMethod.jl](https://github.com/HTSykora/StochasticSemiDiscretizationMethod.jl) package.
+
 # Usage with examples
 ## Installation
 ```julia
