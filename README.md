@@ -5,9 +5,9 @@ Julia package to investigate the behaviour of linear delay differential equation
 
 This package provides a tool to approximate the stability properties and stationary behaviour of linear periodic delay systems of the form:
 
-<!-- $$\dot{\mathbf{x}}(t) = \mathbf{A}(t) \mathbf{x}(t) + \sum_{j=1}^g \mathbf{B}(t) \mathbf{x}(t-\tau_j(t))+\mathbf{c}(t)$$ -->
+<!-- $$\dot{\mathbf{x}}(t) = \mathbf{A}(t) \mathbf{x}(t) + \sum_{j=1}^g \mathbf{B}_j(t) \mathbf{x}(t-\tau_j(t))+\mathbf{c}(t)$$ -->
 
-<img src="https://latex.codecogs.com/gif.latex?\dot{\mathbf{x}}(t)&space;=&space;\mathbf{A}(t)&space;\mathbf{x}(t)&space;&plus;&space;\sum_{j=1}^g&space;\mathbf{B}(t)&space;\mathbf{x}(t-\tau_j(t))&plus;\mathbf{c}(t)" title="\dot{\mathbf{x}}(t) = \mathbf{A}(t) \mathbf{x}(t) + \sum_{j=1}^g \mathbf{B}(t) \mathbf{x}(t-\tau_j(t))+\mathbf{c}(t)" />
+<img src="https://latex.codecogs.com/gif.latex?\dot{\mathbf{x}}(t)&space;=&space;\mathbf{A}(t)&space;\mathbf{x}(t)&space;&plus;&space;\sum_{j=1}^g&space;\mathbf{B}_j(t)&space;\mathbf{x}(t-\tau_j(t))&plus;\mathbf{c}(t)$" title="\dot{\mathbf{x}}(t) = \mathbf{A}(t) \mathbf{x}(t) + \sum_{j=1}^g \mathbf{B}_j(t) \mathbf{x}(t-\tau_j(t))+\mathbf{c}(t)$" />
 
 by transforming the underlying differential equation into the mapping:
 <!-- $$\mathbf{y}_{n+1} = \mathbf{F}_n\mathbf{y}_n+\mathbf{f}_n,$$ -->
