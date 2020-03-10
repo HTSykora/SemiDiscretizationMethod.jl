@@ -114,7 +114,7 @@ end
 
 ```julia
 hayes_lddep=createHayesProblem(-1.,-1.); # LDDE problem for Hayes equation
-method=SemiDiscretization(1,0.1) # 3rd order semi discretization with Δt=0.1
+method=SemiDiscretization(1,0.1) # 1st order semi discretization with Δt=0.1
 τmax=1. # the largest τ of the system
 mapping=DiscreteMapping(hayes_lddep,method,τmax,n_steps=1,calculate_additive=true); #The discrete mapping of the system
 ```
@@ -181,7 +181,7 @@ end;
 τmax=2π # the largest τ of the system
 P=2π #Principle period of the system (sin(t)=sin(t+P)) 
 mathieu_lddep=createMathieuProblem(3.,2.,-0.15,0.1,T=P); # LDDE problem for Hayes equation
-method=SemiDiscretization(1,0.01) # 3rd order semi discretization with Δt=0.1
+method=SemiDiscretization(1,0.01) # 1st order semi discretization with Δt=0.01
 # if P = τmax, then n_steps is automatically calculated
 mapping=DiscreteMapping(mathieu_lddep,method,τmax,
     n_steps=Int((P+100eps(P))÷method.Δt),calculate_additive=true); #The discrete mapping of the system
