@@ -28,7 +28,7 @@ T=2π / Ω * NT  #spindle speed variation in integer number of revolution (NT)
 τmax=2π/Ω *(1+ ASSV) # the largest τ of the system
 
 turningSSV_lddep=createTurningSSVProblem(kw,ζ,Ω,ASSV,T); # LDDE problem for Turning SSV problem
-method=SemiDiscretization(1,0.05) # 3rd order semi discretization with Δt=0.05
+method=SemiDiscretization(1,0.025) # 3rd order semi discretization with Δt=0.05
 ### -------- Try to increase the resolutionby decreasing Δt
 
 
@@ -39,7 +39,7 @@ method=SemiDiscretization(1,0.05) # 3rd order semi discretization with Δt=0.05
 #-----------------------faster computation if T>>τmax----------------------------
 #--------------------------------------------------------------------------------
 
-mapping=DiscreteMapping_1step(turningSSV_lddep,method,τmax,
+@time mapping=DiscreteMapping_1step(turningSSV_lddep,method,τmax,
     n_steps=Int((T+100eps(T))÷method.Δt),calculate_additive=true); #The discrete mapping of the system
 
 @time spectralRadiusOfMapping(mapping); # spectral radius ρ of the mapping matrix (ρ>1 unstable, ρ<1 stable)
@@ -51,7 +51,7 @@ mapping=DiscreteMapping_1step(turningSSV_lddep,method,τmax,
 #--------------------#updated Left\Right mapping matrices of SemiDiscretization----------------
 #----------------------- Order of magnitude faster computation if T<=τmax----------------------
 #----------------------------------------------------------------------------------------------
-mappingLR=DiscreteMapping_LR(turningSSV_lddep,method,τmax,
+@time mappingLR=DiscreteMapping_LR(turningSSV_lddep,method,τmax,
     n_steps=Int((T+100eps(T))÷method.Δt),calculate_additive=true); #The discrete mapping of the system
 
 @time spectralRadiusOfMapping(mappingLR); # spectral radius ρ of the mapping matrix (ρ>1 unstable, ρ<1 stable)

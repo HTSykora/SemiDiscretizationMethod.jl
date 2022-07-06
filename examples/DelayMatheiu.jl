@@ -13,11 +13,19 @@ T=2π #Principle period of the system (sin(t)=sin(t+P))
 mathieu_lddep=createMathieuProblem(3.,2.,-0.15,0.1,T=T); # LDDE problem for Hayes equation
 method=SemiDiscretization(1,0.01) # 3rd order semi discretization with Δt=0.1
 # if P = τmax, then n_steps is automatically calculated
-mapping=DiscreteMapping_LR(mathieu_lddep,method,τmax,
+@time mapping=DiscreteMapping(mathieu_lddep,method,τmax,
+    n_steps=Int((T+100eps(T))÷method.Δt),calculate_additive=true); #The discrete mapping of the system
+@time mapping_LR=DiscreteMapping_LR(mathieu_lddep,method,τmax,
     n_steps=Int((T+100eps(T))÷method.Δt),calculate_additive=true); #The discrete mapping of the system
 
-@show spectralRadiusOfMapping(mapping); # spectral radius ρ of the mapping matrix (ρ>1 unstable, ρ<1 stable)
-fp=fixPointOfMapping(mapping); # stationary solution of the hayes equation (equilibrium position)
+# spectral radius ρ of the mapping matrix (ρ>1 unstable, ρ<1 stable)
+@time @show spectralRadiusOfMapping(mapping);
+@time @show spectralRadiusOfMapping(mapping_LR);
+
+# stationary solution of the hayes equation (equilibrium position)
+@time fp=fixPointOfMapping(mapping);
+@time fp_LR=fixPointOfMapping(mapping_LR);
+
 
 
 using Plots
@@ -26,14 +34,16 @@ using LaTeXStrings
 
 plot(0.0:method.Δt:T,fp[1:2:end],
     xlabel="-s")
+plot!(0.0:method.Δt:T,fp_LR[1:2:end],
+    xlabel="-s")
 #    ,title="t \in [nP,(n+1)P],\quad n \to \infty",guidefontsize=14,linewidth=3,label=L"x(t-s)",legendfontsize=11,tickfont = font(10))
 
 plot!(0.0:method.Δt:T,fp[2:2:end],
     xlabel="-s")
-    #,linewidth=3,    label="\dot{x}(t-s)")
+plot!(0.0:method.Δt:T,fp_LR[2:2:end],
+    xlabel="-s")
+# plot!(0.0:method.Δt:T,sin.(2*(0.0:method.Δt:T)))
 
-plot!(0.0:method.Δt:T,sin.(2*(0.0:method.Δt:T)))
-#,linewidth=3,label="\sin(2t)")
 
 
 
