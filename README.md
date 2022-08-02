@@ -5,58 +5,27 @@ Julia package to investigate the behaviour of linear delay differential equation
 
 This package provides a tool to approximate the stability properties and stationary behaviour of linear periodic delay systems of the form:
 
-<!-- $$\dot{\mathbf{x}}(t) = \mathbf{A}(t) \mathbf{x}(t) + \sum_{j=1}^g \mathbf{B}_j(t) \mathbf{x}(t-\tau_j(t))+\mathbf{c}(t)$$ -->
-
-<img src="https://latex.codecogs.com/gif.latex?\dot{\mathbf{x}}(t)&space;=&space;\mathbf{A}(t)&space;\mathbf{x}(t)&space;&plus;&space;\sum_{j=1}^g&space;\mathbf{B}_j(t)&space;\mathbf{x}(t-\tau_j(t))&plus;\mathbf{c}(t)$" title="\dot{\mathbf{x}}(t) = \mathbf{A}(t) \mathbf{x}(t) + \sum_{j=1}^g \mathbf{B}_j(t) \mathbf{x}(t-\tau_j(t))+\mathbf{c}(t)$" />
-
+$$\dot{\mathbf{x}}(t) = \mathbf{A}(t) \mathbf{x}(t) + \sum_{j=1}^g \mathbf{B}_j(t) \mathbf{x}(t-\tau_j(t))+\mathbf{c}(t)$$
 by transforming the underlying differential equation into the mapping:
-<!-- $$\mathbf{y}_{n+1} = \mathbf{F}_n\mathbf{y}_n+\mathbf{f}_n,$$ -->
+$$\mathbf{y}_{n+1} = \mathbf{F}_n\mathbf{y}_n+\mathbf{f}_n,$$
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{y}_{n&plus;1}&space;=&space;\mathbf{F}_n\mathbf{y}_n&plus;\mathbf{f}_n," target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{y}_{n&plus;1}&space;=&space;\mathbf{F}_n\mathbf{y}_n&plus;\mathbf{f}_n," title="\mathbf{y}_{n+1} = \mathbf{F}_n\mathbf{y}_n+\mathbf{f}_n," /></a>
+where $n$ is the discrete time ($t_n = n \Delta t$), $\mathbf{F}_n$ is the mapping matrix constructed using $\mathbf{A}(t)$, $\mathbf{B}(t)$ and $\tau_j(t)$, while the vector $\mathbf{y}_n$ is the discretized state space vector:
 
-where <!-- $n$ -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=n" target="_blank"><img src="https://latex.codecogs.com/gif.latex?n" title="n" /></a>
-is the discrete time <!-- ($t_n = n \Delta t$) -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=(t_n&space;=&space;n&space;\Delta&space;t)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(t_n&space;=&space;n&space;\Delta&space;t)" title="(t_n = n \Delta t)" /></a>
-, <!-- $\mathbf{F}_n$ -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{F}_n" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{F}_n" title="\mathbf{F}_n" /></a>
- is the mapping matrix constructed using <!-- $\mathbf{A}(t)$ -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{A}(t)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{A}(t)" title="\mathbf{A}(t)" /></a>
-, <!-- $\mathbf{B}(t)$ -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{B}(t)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{B}(t)" title="\mathbf{B}(t)" /></a>
-and <!-- $\tau_j(t)$ -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=\tau_j(t)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\tau_j(t)" title="\tau_j(t)" /></a>
-, while the vector <!-- $\mathbf{y}_n$ -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{y}_n" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{y}_n" title="\mathbf{y}_n" /></a>
-is the discretized state space vector:
+$$ \mathbf{y}_n = \left(\mathbf{x}(t_n)^\top, \mathbf{x}(t_{n-1})^\top,\ldots,\mathbf{x}(t_{n-r})\right)^\top\!.$$
 
-<!-- $$ \mathbf{y}_n = \left(\mathbf{x}(t_n)^\top, \mathbf{x}(t_{n-1})^\top,\ldots,\mathbf{x}(t_{n-r})\right)^\top\!.$$ -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{y}_n&space;=&space;\left(\mathbf{x}(t_n)^\top,&space;\mathbf{x}(t_{n-1})^\top,\ldots,\mathbf{x}(t_{n-r})\right)^\top\!." target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{y}_n&space;=&space;\left(\mathbf{x}(t_n)^\top,&space;\mathbf{x}(t_{n-1})^\top,\ldots,\mathbf{x}(t_{n-r})\right)^\top\!." title="\mathbf{y}_n = \left(\mathbf{x}(t_n)^\top, \mathbf{x}(t_{n-1})^\top,\ldots,\mathbf{x}(t_{n-r})\right)^\top\!." /></a>
-
-Each coefficient matrices of delay differential equations are periodic, with a principle period of <!-- $P$ -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=P" target="_blank"><img src="https://latex.codecogs.com/gif.latex?P" title="P" /></a>
-, namely:
-<!-- $A(t)=A(t+P),\; B_j(t)=B_j(t+P),\; \tau_j(t)=\tau_j(t+P)$) and $c(t)=c(t+P)$ -->
-<img src="https://latex.codecogs.com/gif.latex?A(t)=A(t&plus;P),\;&space;B_j(t)=B_j(t&plus;P),\;&space;\tau_j(t)=\tau_j(t&plus;P)$)&space;and&space;$c(t)=c(t&plus;P)." title="A(t)=A(t+P),\; B_j(t)=B_j(t+P),\; \tau_j(t)=\tau_j(t+P)$) and $c(t)=c(t+P)." />
-Furthermore, the integer <!-- $r$ -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=r" target="_blank"><img src="https://latex.codecogs.com/gif.latex?r" title="r" /></a>
-is chosen in a way, that <!-- $r\Delta t\geq \max_{t \in \left[0,P\right],j=1\ldots g}\tau_j(t)$ -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;r\Delta&space;t\geq&space;\max_{t&space;\in&space;\left[0,P\right],j=1\ldots&space;g}\tau_j(t)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;r\Delta&space;t\geq&space;\max_{t&space;\in&space;\left[0,P\right],j=1\ldots&space;g}\tau_j(t)" title="r\Delta t\geq \max_{t \in \left[0,P\right],j=1\ldots g}\tau_j(t)" /></a>
+Each coefficient matrices of delay differential equations are periodic, with a principle period of $P$, namely:
+$\mathbf A(t)=\mathbf A(t+P),\; \mathbf B_j(t)=\mathbf B_j(t+P),\; \tau_j(t)=\tau_j(t+P)$) and $\mathbf{c}(t)=\mathbf{c}(t+P)$
+Furthermore, the integer $r$ is chosen in a way, that $r\Delta t\geq \max_{t \in \left[0,P\right],j=1\ldots g}\tau_j(t)$
  (the discretized "history function" contains all possible delayed values).  
 
-With the use of the discrete mapping, the stability of the original system can be investigated (approximately), by the spectral radius <!-- $\rho$ -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=\rho" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\rho" title="\rho" /></a>
- of the product of the mapping matrices <!-- $\mathbf{F}_n$ -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{F}_n" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{F}_n" title="\mathbf{F}_n" /></a>
- over a period:
+With the use of the discrete mapping, the stability of the original system can be investigated (approximately), by the spectral radius $\rho$ of the product of the mapping matrices $\mathbf{F}_n$ over a period:
 
-<!-- $$\rho\left(\prod_{i=0}^{p-1}\mathbf{F}_{n+i}\right)\left\{
+$$\rho\left(\prod_{i=0}^{p-1}\mathbf{F}_{n+i}\right): \quad
     \begin{matrix}
     <1 & \Rightarrow & \text{the mapping is stable}\\
     >1 & \Rightarrow & \text{the mapping is unstable}
     \end{matrix}
-    \right.$$ -->
-<img src="https://latex.codecogs.com/gif.latex?\rho\left(\mathbf{F}_{n&plus;p-1}\cdot\mathbf{F}_{n&plus;p-2}\cdot\ldots\cdot\mathbf{F}_{n}\right)\left\{&space;\begin{matrix}&space;<1&space;&&space;\Rightarrow&space;&&space;\text{the&space;mapping&space;is&space;stable}\\&space;>1&space;&&space;\Rightarrow&space;&&space;\text{the&space;mapping&space;is&space;unstable}&space;\end{matrix}&space;\right." title="\rho\left(\mathbf{F}_{n+p-1}\cdot\mathbf{F}_{n+p-2}\cdot\ldots\cdot\mathbf{F}_{n}\right)\left\{ \begin{matrix} <1 & \Rightarrow & \text{the mapping is stable}\\ >1 & \Rightarrow & \text{the mapping is unstable} \end{matrix} \right." />
+    $$
 
 Furthermore, the stationary solution can be determined by the periodic fix point (stationary orbit) of the mapping.
 # Citing
@@ -86,17 +55,16 @@ julia> ] add SemiDiscretizationMethod
 ```
 
 ## Hayes equations
-<!-- $$\dot{x}(t) = a \,x(t) + b \,x(t-1) + 1,$$ -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=\dot{x}(t)&space;=&space;a&space;\,x(t)&space;&plus;&space;b&space;\,x(t-1)&space;&plus;&space;1," target="_blank"><img src="https://latex.codecogs.com/gif.latex?\dot{x}(t)&space;=&space;a&space;\,x(t)&space;&plus;&space;b&space;\,x(t-1)&space;&plus;&space;1." title="\dot{x}(t) = a \,x(t) + b \,x(t-1) + 1." /></a>
+$$\dot{x}(t) = a \,x(t) + b \,x(t-1) + 1.$$
 
 Here 
 
-<!-- $$ \mathbf{A}(t) \equiv \begin{bmatrix} a \end{bmatrix},
+$$ \mathbf{A}(t) \equiv \begin{bmatrix} a \end{bmatrix},
 \quad \mathbf{B}_1(t) \equiv \begin{bmatrix}b\end{bmatrix},
 \quad \tau_1(t) \equiv 1 , 
-\quad \text{and} \quad \mathbf{c}(t) \equiv \begin{bmatrix} 1 \end{bmatrix}.$$ -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{A}(t)&space;\equiv&space;\begin{bmatrix}&space;a&space;\end{bmatrix},&space;\quad&space;\mathbf{B}_1(t)&space;\equiv&space;\begin{bmatrix}b\end{bmatrix},&space;\quad&space;\tau_1(t)&space;\equiv&space;1&space;,&space;\quad&space;\text{and}&space;\quad&space;\mathbf{c}(t)&space;\equiv&space;\begin{bmatrix}&space;1&space;\end{bmatrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{A}(t)&space;\equiv&space;\begin{bmatrix}&space;a&space;\end{bmatrix},&space;\quad&space;\mathbf{B}_1(t)&space;\equiv&space;\begin{bmatrix}b\end{bmatrix},&space;\quad&space;\tau_1(t)&space;\equiv&space;1&space;,&space;\quad&space;\text{and}&space;\quad&space;\mathbf{c}(t)&space;\equiv&space;\begin{bmatrix}&space;1&space;\end{bmatrix}." title="\mathbf{A}(t) \equiv \begin{bmatrix} a \end{bmatrix}, \quad \mathbf{B}_1(t) \equiv \begin{bmatrix}b\end{bmatrix}, \quad \tau_1(t) \equiv 1 , \quad \text{and} \quad \mathbf{c}(t) \equiv \begin{bmatrix} 1 \end{bmatrix}." /></a>  
-(Page 13 of the book)
+\quad \text{and} \quad \mathbf{c}(t) \equiv \begin{bmatrix} 1 \end{bmatrix}.$$
+
+(Page 13 of the book referenced above)
 
 ```julia
 using SemiDiscretizationMethod
@@ -153,20 +121,18 @@ scatter(stab_border_points...,xlim=(-15.,15.),ylim=(-15.,15.),
 ```
 ![](./assets/HayesStability.png)
 ## Delay Mathieu equation
-<!-- $$\ddot{x}(t) + a_1 \,\dot{x}(t)+(\delta + \varepsilon \cos(t))x(t)= b_0 \,x(t-2\pi) + \sin(2t)$$ -->
-<a href="https://www.codecogs.com/eqnedit.php?latex=\ddot{x}(t)&space;&plus;&space;a_1&space;\,\dot{x}(t)&plus;(\delta&space;&plus;&space;\varepsilon&space;\cos(t))x(t)=&space;b_0&space;\,x(t-2\pi)&space;&plus;&space;\sin(2t)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\ddot{x}(t)&space;&plus;&space;a_1&space;\,\dot{x}(t)&plus;(\delta&space;&plus;&space;\varepsilon&space;\cos(t))x(t)=&space;b_0&space;\,x(t-2\pi)&space;&plus;&space;\sin(2t)." title="\ddot{x}(t) + a_1 \,\dot{x}(t)+(\delta + \varepsilon \cos(t))x(t)= b_0 \,x(t-2\pi) + \sin(2t)." /></a>
 
-Here 
-<!-- $$ \mathbf{x}(t) = \begin{bmatrix}x(t) \\ \dot{x}(t)\end{bmatrix}, \quad
+$$\ddot{x}(t) + a_1 \\,\dot{x}(t)+(\delta + \varepsilon \cos(t))x(t)= b_0 \\,x(t-2\pi) + \sin(2t)$$
+
+<!--Here 
+
+$$ \mathbf{x}(t) = \begin{bmatrix} x(t) \\ \dot{x}(t) \end{bmatrix} , \quad
 \mathbf{A}(t) = \begin{bmatrix} 0 & 1 \\ -\delta - \varepsilon \cos(t) & -a_1 \end{bmatrix},
 \quad \mathbf{B}_1(t) = \begin{bmatrix}0 & 0 \\ b_0 & 0\end{bmatrix},
 \quad \tau_1(t) \equiv 2\pi, 
 \quad \text{and} \quad \mathbf{c}(t) = \begin{bmatrix} 0 \\ \sin(2t) \end{bmatrix}.$$ -->
-<img src="https://latex.codecogs.com/gif.latex?\mathbf{x}(t)&space;=&space;\begin{bmatrix}x(t)&space;\\&space;\dot{x}(t)\end{bmatrix},&space;\quad&space;\mathbf{A}(t)&space;=&space;\begin{bmatrix}&space;0&space;&&space;1&space;\\&space;-\delta&space;-&space;\varepsilon&space;\cos(t)&space;&&space;-a_1&space;\end{bmatrix},&space;\quad&space;\mathbf{B}_1(t)&space;=&space;\begin{bmatrix}0&space;&&space;0&space;\\&space;b_0&space;&&space;0\end{bmatrix}," title="\mathbf{x}(t) = \begin{bmatrix}x(t) \\ \dot{x}(t)\end{bmatrix}, \quad \mathbf{A}(t) = \begin{bmatrix} 0 & 1 \\ -\delta - \varepsilon \cos(t) & -a_1 \end{bmatrix}, \quad \mathbf{B}_1(t) = \begin{bmatrix}0 & 0 \\ b_0 & 0\end{bmatrix}," />  
-<br>
-<img src="https://latex.codecogs.com/gif.latex?\tau_1(t)&space;\equiv&space;2\pi,&space;\quad&space;\text{and}&space;\quad&space;\mathbf{c}(t)&space;=&space;\begin{bmatrix}&space;0&space;\\&space;\sin(2t)&space;\end{bmatrix}." title="\tau_1(t) \equiv 2\pi, \quad \text{and} \quad \mathbf{c}(t) = \begin{bmatrix} 0 \\ \sin(2t) \end{bmatrix}." />
 
-(Page 77 of the book)
+(Page 77 of the book referenced above)
 
 ```julia
 function createMathieuProblem(δ,ε,b0,a1;T=2π)
