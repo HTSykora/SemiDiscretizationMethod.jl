@@ -36,7 +36,7 @@ end
 calculate_Aavgs(A::ProportionalMX{d,<:Function}, ts::AbstractVector{<:Real},Δt::Real) where d = [(quadgk(A, ts[i], ts[i + 1])[1] ./ Δt) for i in 1:length(ts)-1]
 calculate_Aavgs(A::ProportionalMX{d,<:mT}, ts::AbstractVector{<:Real},Δt::Real)  where d where mT <: AbstractMatrix{T} where T = CyclicVector([A.MX])
 
-function Result(LDDEP::LDDEProblem{d,AT,BT, cT}, method::DiscretizationMethod{fT}, DiscretizationLength::Real; n_steps::Int64=nStepOfLength(DiscretizationLength, method.Δt), calculate_additive::Bool=false) where {d,AT,BT,cT,N,fT}
+function Result(LDDEP::LDDEProblem{d,AT,BT, cT}, method::DiscretizationMethod{fT}, DiscretizationLength::Real; n_steps::Int64=nStepOfLength(DiscretizationLength, method.Δt), calculate_additive::Bool=false) where {d,AT,BT,cT,fT}
     # DiscretizationLength discretisated time interval length
     # n_steps: how many mapping matrix to calculate
     ts =  collect(fT,take(n_steps + 1, iterated(x -> method.Δt + x, zero(method.Δt))))
