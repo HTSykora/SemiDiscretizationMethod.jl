@@ -1,3 +1,5 @@
+5+5
+using Revise
 using SemiDiscretizationMethod
 
 function createMathieuProblem(δ,ε,b0,a1;T=2π)
@@ -9,9 +11,9 @@ function createMathieuProblem(δ,ε,b0,a1;T=2π)
 end;
 
 τmax=2π # the largest τ of the system
-T=2π #Principle period of the system (sin(t)=sin(t+P)) 
-mathieu_lddep=createMathieuProblem(3.,2.,-0.15,0.1,T=T); # LDDE problem for Hayes equation
-method=SemiDiscretization(1,0.01) # 3rd order semi discretization with Δt=0.1
+T=3π #Principle period of the system (sin(t)=sin(t+P)) 
+mathieu_lddep=createMathieuProblem(3.,0.2,-0.15,0.1,T=T); # LDDE problem for Hayes equation
+method=SemiDiscretization(0,0.025) # 3rd order semi discretization with Δt=0.1
 # if P = τmax, then n_steps is automatically calculated
 @time mapping=DiscreteMapping(mathieu_lddep,method,τmax,
     n_steps=Int((T+100eps(T))÷method.Δt),calculate_additive=true); #The discrete mapping of the system
@@ -32,25 +34,18 @@ using Plots
 gr();
 using LaTeXStrings
 
-plot(0.0:method.Δt:T,fp[1:2:end],
-    xlabel="-s")
-plot!(0.0:method.Δt:T,fp_LR[1:2:end],
-    xlabel="-s")
-#    ,title="t \in [nP,(n+1)P],\quad n \to \infty",guidefontsize=14,linewidth=3,label=L"x(t-s)",legendfontsize=11,tickfont = font(10))
+r=length(fp[1:2:end])
+plot( (1:r) .* method.Δt,fp[2:2:end],xlabel="-s",label=L"\dot{x}(t-s)")
+plot!((1:r) .* method.Δt,fp[1:2:end],xlabel="-s",label=L"x(t-s)")
 
-plot!(0.0:method.Δt:T,fp[2:2:end],
-    xlabel="-s")
-plot!(0.0:method.Δt:T,fp_LR[2:2:end],
-    xlabel="-s")
+p=length(fp_LR[1:2:end])
+plot!((0:p-1) .* method.Δt,fp_LR[2:2:end],xlabel="-s",label=L"\dot{x}_{LR}(t-s)")
+plot!((0:p-1) .* method.Δt,fp_LR[1:2:end],xlabel=L"-s",title=L"t \in [nP,(n+1)P],\quad n \to \infty",guidefontsize=14,linewidth=3,label=L"x_{LR}(t-s)",legendfontsize=11,tickfont = font(10))
+
 # plot!(0.0:method.Δt:T,sin.(2*(0.0:method.Δt:T)))
 
 
-
-
-
-
-
-
+#--------- Stability map ----------
 using MDBM
 
 
