@@ -28,24 +28,11 @@ T=2π / Ω * NT  #spindle speed variation in integer number of revolution (NT)
 τmax=2π/Ω *(1+ ASSV) # the largest τ of the system
 
 turningSSV_lddep=createTurningSSVProblem(kw,ζ,Ω,ASSV,T); # LDDE problem for Turning SSV problem
-method=SemiDiscretization(1,0.025) # 3rd order semi discretization with Δt=0.05
+method=SemiDiscretization(1,0.1) # 1st order semi discretization with Δt=0.05
 ### -------- Try to increase the resolutionby decreasing Δt
 
 
 #<<<<<<<<<<<<<<<<<<<<<<Stability calculation in one point>>>>>>>>>>>>>>>>>>>>>>>
-
-#--------------------------------------------------------------------------------
-#-----------------traditional mapping of SemiDiscretization----------------------
-#-----------------------faster computation if T>>τmax----------------------------
-#--------------------------------------------------------------------------------
-
-@time mapping=DiscreteMapping_1step(turningSSV_lddep,method,τmax,
-    n_steps=Int((T+100eps(T))÷method.Δt),calculate_additive=true); #The discrete mapping of the system
-
-@time spectralRadiusOfMapping(mapping); # spectral radius ρ of the mapping matrix (ρ>1 unstable, ρ<1 stable)
-@time fixPointOfMapping(mapping); # stationary solution of the system (equilibrium position)
-
-
 
 #----------------------------------------------------------------------------------------------
 #--------------------#updated Left\Right mapping matrices of SemiDiscretization----------------
@@ -58,3 +45,14 @@ method=SemiDiscretization(1,0.025) # 3rd order semi discretization with Δt=0.05
 @time fixPointOfMapping(mappingLR); # stationary solution of the system (equilibrium position)
 
 
+
+#--------------------------------------------------------------------------------
+#-----------------traditional mapping of SemiDiscretization----------------------
+#------------------could be faster computation if T>>τmax------------------------
+#--------------------------------------------------------------------------------
+
+@time mapping=DiscreteMapping_1step(turningSSV_lddep,method,τmax,
+    n_steps=Int((T+100eps(T))÷method.Δt),calculate_additive=true); #The discrete mapping of the system
+
+@time spectralRadiusOfMapping(mapping); # spectral radius ρ of the mapping matrix (ρ>1 unstable, ρ<1 stable)
+@time fixPointOfMapping(mapping); # stationary solution of the system (equilibrium position)

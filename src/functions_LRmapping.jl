@@ -19,9 +19,9 @@ function DiscreteMappingSteps_LR(rst::AbstractResult{d}) where d
     Nτ=rst.n ÷ d;
     Nmaximal=max(Nτ,NT);
 
-    ΦL=spdiagm( 0 => ones(d * Nmaximal));
+    ΦL=spdiagm( 0 => -ones(d * Nmaximal));
     if Nτ>NT
-        ΦR=spdiagm( -d * (NT) => ones(d * (Nτ-NT)));
+        ΦR=spdiagm( -d * (NT) => -ones(d * (Nτ-NT)));
     else
         ΦR=spzeros(d * Nmaximal, d * Nmaximal );
     end
@@ -50,7 +50,7 @@ function addSubmatrixToL!(Φ::AbstractArray, subMX::SubMX, it_shift1, it_shift2,
     for i in eachindex(subMX.ranges, subMX.MXs)
         positionrange=LR_positionshift(subMX.ranges[i],it_shift1,it_shift2);
         if (positionrange[2][end])<=nlimit && (positionrange[2][1])>0 
-            Φ[positionrange...] .-= subMX.MXs[i];
+            Φ[positionrange...] .+= subMX.MXs[i];
         end
     end
 end
@@ -59,7 +59,7 @@ function addSubmatrixToR!(Φ::AbstractArray, subMX::SubMX, it_shift1, it_shift2,
     for i in eachindex(subMX.ranges, subMX.MXs)
         positionrange=LR_positionshift(subMX.ranges[i],it_shift1,it_shift2);
         if (positionrange[2][1])>0 
-            Φ[positionrange...] .+= subMX.MXs[i];
+            Φ[positionrange...] .-= subMX.MXs[i];
         end
     end
 end
