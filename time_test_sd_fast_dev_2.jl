@@ -19,22 +19,22 @@ using BenchmarkTools
 function createMathieuProblem(δ, ε, b0, a1; T=2π)
     AMx = ProportionalMX(t -> @SMatrix [0.0 1.0; -δ-ε*cos(2π / T * t) -a1])
     #τ1=t->1+0.3*sin(t/T*2*pi*3)#2.75π # if function is needed, the use τ1 = t->foo(t)
-    τ1 = 0.5π # if function is needed, the use τ1 = t->foo(t)
+    #τ1 = 0.5π # if function is needed, the use τ1 = t->foo(t)
     #τ1 =τ1 = t->0.5π-0.5π*cos(2π / T * t * 2) 
-    #τ1 =τ1 = t->0.5π-0.25π*(  t /  T) 
+    τ1 =τ1 = t->4π-0.5π*(  t /  T) 
     BMx1 = DelayMX(τ1, t -> @SMatrix [0.0 0.0; b0 0.0])
     #τ2=1.0π # if function is needed, the use τ1 = t->foo(t)
-    τ2 =τ1 = t->1.0π-0.000π*(  t /  T) 
-    #TODO: nem ugyan az ha függvény vagy, ha konstans!?!?!?!?! WTF????
+    τ2 =τ1 = t->2.0π-0.000π*(  t /  T) 
+    #TODO: nem ugyan az ha függvény vagy, ha konstans!?!?!?!?! 
     BMx2 = DelayMX(τ2,t->@SMatrix [0. 0.; b0 0.]);
     cVec = Additive(t -> @SVector [0.0, 1.0 * cos(2π / T * t * 4)])
     LDDEProblem(AMx,[BMx1,BMx2],cVec)
    # LDDEProblem(AMx, BMx1, cVec)
 end
 
-Ndisc=10
-τmax = 1π # the largest τ of the system
-T = 2π #Principle period of the system (sin(t)=cos(t+T)) 
+Ndisc=20
+τmax = 4π # the largest τ of the system
+T = 3π #Principle period of the system (sin(t)=cos(t+T)) 
 mathieu_lddep = createMathieuProblem(3.0, 2.9, -0.45, 0.2, T=T) # LDDE problem for Hayes equation
 method = SemiDiscretization(0, T  / Ndisc) # 3rd order semi discretization with Δt=0.1
 Nsteps = Int((T + 100eps(T)) ÷ method.Δt)
@@ -65,31 +65,47 @@ println(  [iloc,it,iIPR])
 
                 push!(i,collect(smx.ranges[iloc][1]) .* ones(1,d)...)
                 push!(j,ones(d,1) .* collect(smx.ranges[iloc][2])'...)
-                push!(v,smx.MXs[iloc]...)
+                push!(v,-smx.MXs[iloc]...)
                 #i[:,:,iloc,it,iIPR] .= getindex.(collect(eachindex(IndexCartesian(),smloc)),1)
                 #j[:,:,iloc,it,iIPR] .= getindex.(collect(eachindex(IndexCartesian(),smloc)),2)
                 #v[:,:,iloc,it,iIPR] .= smloc
             end
         end
     end
+    
+    push!(i,(1:rst.n_steps*d)...)
+    push!(j,(1:rst.n_steps*d)...)
+    push!(v,1.0 .* ones(rst.n_steps*d,1)...)
 #    sparse(i, j, v,[ m, n, combine])
-   PHI= sparse(i, j, v)
+
+r=rst.n ÷ d
+p=rst.n_steps
+rhat=maximum([r,p-1])
+
+   PHI= sparse(i, j, v,p*d,(rhat+p+1)*d)
+   dropzeros!(PHI)
+spy(PHI)
+plot!(gridlinewidth=2)
 
 
-   size(i)
-   size(j)
-   size(v)
+
+
+PHIL=-PHI[1:(rhat+1)*d,1:(rhat+1)*d]
+PHIR=PHI[1:(rhat+1)*d,(rhat+1)*d+1:end]
+
+spy(hcat(-PHIL,PHIR))
+Matrix(hcat(-PHIL,PHIR))
+
+spy(hcat(-mappingLR.LmappingMX,mappingLR.RmappingMX))
+Matrix(hcat(-mappingLR.LmappingMX,mappingLR.RmappingMX))
+
+abs.(eigs(PHIR,PHIL)[1])
+abs.(eigs(mappingLR.RmappingMX,mappingLR.LmappingMX)[1])
 
 
 
-#Matrix
-(hcat(-mappingLR.LmappingMX,mappingLR.RmappingMX))
-
-
-Mxs=[rst.subMXs[1][i].MXs[1] for i in 1:4]
-sparse(1:4, 2:5,Mxs)
-dropzeros!()
-
+mapping = DiscreteMapping(mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true)#The discrete mapping of the system
+spectralRadiusOfMapping(mapping)
 
 
 
