@@ -30,6 +30,9 @@ method=SemiDiscretization(0,0.025) # 3rd order semi discretization with Δt=0.1
 
 
 
+Matrix(hcat(-mapping_LR.LmappingMX,mapping_LR.RmappingMX))
+
+
 using Plots
 gr();
 using LaTeXStrings

@@ -13,6 +13,27 @@ function DiscreteMapping_LR(LDDEP::AbstractLDDEProblem, method::DiscretizationMe
     DiscreteMapping_LR(DiscreteMappingSteps_LR(result)...)
 end
 
+function rangeshift_LR!(rst::AbstractResult{d}) where d
+    println("A")
+    for  (iIPR,smx_IPR) in enumerate(rst.subMXs)#P,R1,R2....
+        for (it,smx) in enumerate(smx_IPR) #each time
+            for iloc in eachindex(smx.ranges, smx.MXs)
+             println("-------------")   
+println(  [iloc,it,iIPR])
+println(  smx.ranges[iloc] )
+          smx.ranges[iloc] = 
+         (smx.ranges[iloc][1] .- (it-1-(rst.n_steps-1))*d,
+          smx.ranges[iloc][2] .- (it-1-(rst.n_steps))*d )
+println(  smx.ranges[iloc] )
+            end
+        end
+    end
+end
+
+function  DiscreteMappingSteps_LR_directSparse(rst::AbstractResult{d}) where d
+    result = calculateResults(LDDEP, method, DiscretizationLength,n_steps = n_steps, calculate_additive = calculate_additive);
+   
+end
 
 function DiscreteMappingSteps_LR(rst::AbstractResult{d}) where d
     NT=size(rst.subMXs[1])[1];
