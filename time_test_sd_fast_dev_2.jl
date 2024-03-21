@@ -1,11 +1,13 @@
 ######Product-Free full mapping
 ######The mapping is repsented by a left and a right matrix
+5+5
+
 import Pkg
 #####
 Pkg.activate("")
 ###### Pkg.activate()# ez az eredeti, mindent tartalamzo
 ######] dev SemiDiscretizationMethod
-5+5
+
 using Revise
 using SemiDiscretizationMethod
 using StaticArrays
@@ -24,7 +26,7 @@ function createMathieuProblem(δ, ε, b0, a1; T=2π)
     τ1 =τ1 = t->4π-0.5π*(  t /  T) 
     BMx1 = DelayMX(τ1, t -> @SMatrix [0.0 0.0; b0 0.0])
     #τ2=1.0π # if function is needed, the use τ1 = t->foo(t)
-    τ2 =τ1 = t->2.0π-0.000π*(  t /  T) 
+    τ2 =τ1 = t->2.0π-1.0π*(  t /  T) 
     #TODO: nem ugyan az ha függvény vagy, ha konstans!?!?!?!?! 
     BMx2 = DelayMX(τ2,t->@SMatrix [0. 0.; b0 0.]);
     cVec = Additive(t -> @SVector [0.0, 1.0 * cos(2π / T * t * 4)])
@@ -32,83 +34,33 @@ function createMathieuProblem(δ, ε, b0, a1; T=2π)
    # LDDEProblem(AMx, BMx1, cVec)
 end
 
-Ndisc=20
+Ndisc=500
 τmax = 4π # the largest τ of the system
-T = 3π #Principle period of the system (sin(t)=cos(t+T)) 
+T = 1π #Principle period of the system (sin(t)=cos(t+T)) 
 mathieu_lddep = createMathieuProblem(3.0, 2.9, -0.45, 0.2, T=T) # LDDE problem for Hayes equation
 method = SemiDiscretization(0, T  / Ndisc) # 3rd order semi discretization with Δt=0.1
 Nsteps = Int((T + 100eps(T)) ÷ method.Δt)
 
-mappingLR = DiscreteMapping_LR(mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true)#The discrete mapping of the system
-μLR = spectralRadiusOfMapping(mappingLR)
-
-rst = SemiDiscretizationMethod.calculateResults(mathieu_lddep, method, τmax,n_steps = Nsteps, calculate_additive = true);
-println("---------------------shift-----------------------")
-rst.subMXs[1]
-rst.subMXs[2]
-rst.subMXs[3]
-SemiDiscretizationMethod.rangeshift_LR!(rst)
-
-#i=zeros(Int,size(rst.subMXs[1][1].MXs[1],1),size(rst.subMXs[1][1].MXs[1],2),size(rst.subMXs[1][1].MXs,1),size(rst.subMXs[1],1),size(rst.subMXs,1)+1)
-#j=zeros(Int,size(rst.subMXs[1][1].MXs[1],1),size(rst.subMXs[1][1].MXs[1],2),size(rst.subMXs[1][1].MXs,1),size(rst.subMXs[1],1),size(rst.subMXs,1)+1)
-#v=zeros(size(rst.subMXs[1][1].MXs[1],1),size(rst.subMXs[1][1].MXs[1],2),size(rst.subMXs[1][1].MXs,1),size(rst.subMXs[1],1),size(rst.subMXs,1)+1)
-i=zeros(Int,0)
-j=zeros(Int,0)
-v=zeros(typeof(rst.subMXs[1][1].MXs[1][1]),0)
-d=2
-    for (iIPR,smx_IPR) in enumerate(rst.subMXs)#P,R1,R2....
-       for (it,smx) in enumerate(smx_IPR) #each time
-            for iloc in eachindex(smx.ranges, smx.MXs)
-                
-#println("----")
-println(  [iloc,it,iIPR])
-
-                push!(i,collect(smx.ranges[iloc][1]) .* ones(1,d)...)
-                push!(j,ones(d,1) .* collect(smx.ranges[iloc][2])'...)
-                push!(v,-smx.MXs[iloc]...)
-                #i[:,:,iloc,it,iIPR] .= getindex.(collect(eachindex(IndexCartesian(),smloc)),1)
-                #j[:,:,iloc,it,iIPR] .= getindex.(collect(eachindex(IndexCartesian(),smloc)),2)
-                #v[:,:,iloc,it,iIPR] .= smloc
-            end
-        end
-    end
-    
-    push!(i,(1:rst.n_steps*d)...)
-    push!(j,(1:rst.n_steps*d)...)
-    push!(v,1.0 .* ones(rst.n_steps*d,1)...)
-#    sparse(i, j, v,[ m, n, combine])
-
-r=rst.n ÷ d
-p=rst.n_steps
-rhat=maximum([r,p-1])
-
-   PHI= sparse(i, j, v,p*d,(rhat+p+1)*d)
-   dropzeros!(PHI)
-spy(PHI)
-plot!(gridlinewidth=2)
-
-
-
-
-PHIL=-PHI[1:(rhat+1)*d,1:(rhat+1)*d]
-PHIR=PHI[1:(rhat+1)*d,(rhat+1)*d+1:end]
-
-spy(hcat(-PHIL,PHIR))
-Matrix(hcat(-PHIL,PHIR))
-
-spy(hcat(-mappingLR.LmappingMX,mappingLR.RmappingMX))
-Matrix(hcat(-mappingLR.LmappingMX,mappingLR.RmappingMX))
-
-abs.(eigs(PHIR,PHIL)[1])
-abs.(eigs(mappingLR.RmappingMX,mappingLR.LmappingMX)[1])
-
-
+#mappingLR = DiscreteMapping_LR(mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true)#The discrete mapping of the system
+#μLR = spectralRadiusOfMapping(mappingLR)
 
 mapping = DiscreteMapping(mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true)#The discrete mapping of the system
-spectralRadiusOfMapping(mapping)
+@show μ = spectralRadiusOfMapping(mapping)
 
+mappingLR_SP = DiscreteMapping_LR_directSparse(mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true)#The discrete mapping of the system
+@show μLR_SP = spectralRadiusOfMapping(mappingLR_SP)
 
+#   --------------- time test -------------------------
 
+@time mapping = DiscreteMapping(mathieu_lddep, method, τmax,
+    n_steps=Int((T + 100eps(T)) ÷ method.Δt), calculate_additive=true); #The discrete mapping of the system
+@time mapping_LR_SP = DiscreteMapping_LR_directSparse(mathieu_lddep, method, τmax,
+    n_steps=Int((T + 100eps(T)) ÷ method.Δt), calculate_additive=true); #The discrete mapping of the system
+
+# spectral radius ρ of the mapping matrix (ρ>1 unstable, ρ<1 stable)
+@time @show spectralRadiusOfMapping(mapping);
+#@time @show spectralRadiusOfMapping(mapping_LR);
+@time @show spectralRadiusOfMapping(mapping_LR_SP);
 
 
 

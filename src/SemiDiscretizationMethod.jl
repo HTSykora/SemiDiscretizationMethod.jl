@@ -26,7 +26,9 @@ Additive,
 LDDEProblem,
 DiscreteMapping, DiscreteMapping_1step,
 fixPointOfMapping, spectralRadiusOfMapping,
-DiscreteMapping_LR
+DiscreteMapping_LR,
+DiscreteMappingSteps_LR_directSparse,
+DiscreteMapping_LR_directSparse
 
 
 end # module
