@@ -35,7 +35,7 @@ axis=[Axis(-15.0:15.,:a),
     Axis(-15.0:15.,:b)]
 
 iteration=3;
-stab_border_points=getinterpolatedsolution(solve!(MDBM_Problem(foo,axis),iteration));
+@time stab_border_points=getinterpolatedsolution(solve!(MDBM_Problem(foo,axis),iteration));
 
 scatter(stab_border_points...,xlim=(-15.,15.),ylim=(-15.,15.),
     label="",title="Stability border of the Hayes equation",xlabel=L"a",ylabel=L"b",
