@@ -48,7 +48,7 @@ method=SemiDiscretization(1,0.1) # 1st order semi discretization with Δt=0.05
 
 #--------------------------------------------------------------------------------
 #-----------------traditional mapping of SemiDiscretization----------------------
-#------------------could be faster computation if T>>τmax------------------------
+#-----------------'could' be faster computation if T>>τmax-----------------------
 #--------------------------------------------------------------------------------
 
 @time mapping=DiscreteMapping_1step(turningSSV_lddep,method,τmax,

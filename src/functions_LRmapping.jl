@@ -16,7 +16,8 @@ function DiscreteMapping_LR(LDDEP::AbstractLDDEProblem, method::DiscretizationMe
 end
 
 function rangeshift_LR!(rst::AbstractResult{d}) where {d}
-    for (iIPR, smx_IPR) in enumerate(rst.subMXs)#P,R1,R2....
+    #for (iIPR, smx_IPR) in enumerate(rst.subMXs)#P,R1,R2....
+    for smx_IPR in rst.subMXs#P,R1,R2....
         for (it, smx) in enumerate(smx_IPR) #each time
             for iloc in eachindex(smx.ranges, smx.MXs)
                 smx.ranges[iloc] =

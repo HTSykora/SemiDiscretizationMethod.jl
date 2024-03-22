@@ -36,10 +36,10 @@ function createMathieuProblem(δ, ε, b0, a1; T=2π)
    # LDDEProblem(AMx, BMx1, cVec)
 end
 
-Ndisc=150
+Ndisc=1000
 
 τmax = 2π # the largest τ of the system
-T = 0.1π #Principle period of the system (sin(t)=cos(t+T)) 
+T = 4π #Principle period of the system (sin(t)=cos(t+T)) 
 mathieu_lddep = createMathieuProblem(3.0, 2.9, -0.45, 0.2, T=T) # LDDE problem for Hayes equation
 method = SemiDiscretization(5 ,T  / Ndisc) # 3rd order semi discretization with Δt=0.1
 Nsteps = Int((T + 100eps(T)) ÷ method.Δt)
@@ -51,20 +51,36 @@ Nsteps = Int((T + 100eps(T)) ÷ method.Δt)
 @show @time μ = spectralRadiusOfMapping(mapping)
 @time mapping = DiscreteMapping_1step(mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true);#The discrete mapping of the system
 @show @time μ = spectralRadiusOfMapping(mapping)
-
 @time mappingLR = DiscreteMapping_LR(mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true);#The discrete mapping of the system
-@show @time μLR = spectralRadiusOfMapping(mappingLR_SP)
+@show @time μLR = spectralRadiusOfMapping(mappingLR)
+
+#tiem of eig test for different precision-------
+tt=[]
+muerror=[]
+kpowv=-15:1.:0
+for kpow in kpowv
+tloc=@elapsed μLR = spectralRadiusOfMapping(mapping,nev=1,tol=10.0^kpow)
+push!(tt,tloc)
+push!(muerror,μ -μLR)
+println( μ -μLR)
+end
+scatter(tt,log.(abs.(muerror)))
+#scatter!(tt,log.(abs.(muerror)))
+#scatter(kpowv,log.(abs.(muerror)))
+#scatter!(tt,kpowv)
+
+#--------- profiling the code ---------------
 
 using Profile
 function foo(n)
 for k in  1:n
     map = DiscreteMapping_LR(mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true);#The discrete mapping of the system
-    μLR_SP = spectralRadiusOfMapping(map)
+    μLR_SP = spectralRadiusOfMapping(map,nev=1,tol=10.0^kpow)
 end
 end
 foo(4)
 
-@profview foo(10)
+@profview foo(1000)
 
 # --------------- time test -------------------------
 # -----------------------------------------------------
@@ -72,28 +88,32 @@ foo(4)
 
 
 Nv = ceil.(10 .^ (1.0:0.01:5.61)) #5.61  #100:100:3000
-Nv = ceil.(10 .^ (1.0:0.02:6))
+Nv = ceil.(10 .^ (1.0:0.05:6))
 Twaitfor_SH = 10.0;
 
-#Nv = ceil.(10 .^ (1.0:0.05:5.00))
-#Twaitfor_SH = 1.0;
+Nv = ceil.(10 .^ (1.0:0.1:4.00))
+Twaitfor_SH = 3.0;
 
-tmake_SH_PRi = zeros(Float64, length(Nv));
-tmake_SH_Ci = zeros(Float64, length(Nv));
-#tmake_SH_Ci = zeros(Float64, length(Nv));# approx zero time
-tmake_SH_PhiALL = zeros(Float64, length(Nv));
-teig_SH = zeros(Float64, length(Nv));
-tfixP_SH = zeros(Float64, length(Nv));
-μSH = zeros(Float64, length(Nv));
+kpow=1e-3
+NEV=1
+kpow=1e-20  #has stron effect in T<tau
+NEV=20
+
+tmake_SH_PRi = zeros(Float64, length(Nv)) ;
+tmake_SH_Ci = zeros(Float64, length(Nv)) ;
+tmake_SH_PhiALL = zeros(Float64, length(Nv)) ;
+teig_SH = zeros(Float64, length(Nv)) ;
+tfixP_SH = zeros(Float64, length(Nv)) ;
+μSH = zeros(Float64, length(Nv)) ;
 
 
 domoreSH = true;
 domoreSH_PR = true;
 #@show domoreSH=false;
-tmake_LR = zeros(Float64, length(Nv));
-teig_LR = zeros(Float64, length(Nv));
-tfixP_LR = zeros(Float64, length(Nv));
-μLR = zeros(Float64, length(Nv));
+tmake_LR = zeros(Float64, length(Nv)) ;
+teig_LR = zeros(Float64, length(Nv)) ;
+tfixP_LR = zeros(Float64, length(Nv)) ;
+μLR = zeros(Float64, length(Nv)) ;
 
 
 f1 = (x) -> log(x) ./ log(10)
@@ -120,12 +140,12 @@ for kNdisc in vcat([1,1],1:length(Nv)) #the first is repated to get read of the 
     println([kNdisc / length(Nv), Ndisc])
 
     #@show Naver = maximum([ceil(4 - (log(Ndisc) / log(10))) * 2, 1])
-    @show Naver = 10
+    @show Naver = 1
     τmax = 2π # the largest τ of the system
-    T = 2π #Principle period of the system (sin(t)=cos(t+T)) 
+    T = 4pi #Principle period of the system (sin(t)=cos(t+T)) 
     mathieu_lddep = createMathieuProblem(3.0, 2.9, -0.45, 0.2, T=T) # LDDE problem for Hayes equation
 
-    method = SemiDiscretization(0, 2 * pi / Ndisc) # 3rd order semi discretization with Δt=0.1
+    method = SemiDiscretization(1, T / Ndisc) # 3rd order semi discretization with Δt=0.1
 
     Nsteps = Int((T + 100eps(T)) ÷ method.Δt)
     for _ = 1:Naver
@@ -134,8 +154,9 @@ for kNdisc in vcat([1,1],1:length(Nv)) #the first is repated to get read of the 
         tmake_SH_PRi[kNdisc] += @elapsed resultPR = SemiDiscretizationMethod.calculateResults(mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true)
         if domoreSH_PR
             tmake_SH_Ci[kNdisc] += @elapsed mmpp2 = SemiDiscretizationMethod.DiscreteMappingSteps(resultPR)
-            #tmake_SH_Ci[kNdisc] += @elapsed mmpp3 = SemiDiscretizationMethod.DiscreteMapping(mmpp2...)
             domoreSH_PR = tmake_SH_Ci[kNdisc] < Twaitfor_SH * Naver
+        else
+            tmake_SH_Ci[kNdisc] =NaN;
         end
         if domoreSH
             println("domoreSH")
@@ -150,9 +171,12 @@ for kNdisc in vcat([1,1],1:length(Nv)) #the first is repated to get read of the 
 
 
             tmake_SH_PhiALL[kNdisc] += @elapsed mappingFull = DiscreteMapping_1step(mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true) #The discrete mapping of the system
-            teig_SH[kNdisc] += @elapsed μSH[kNdisc] = spectralRadiusOfMapping(mappingFull)
+            teig_SH[kNdisc] += @elapsed μSH[kNdisc] = spectralRadiusOfMapping(mappingFull,nev=NEV,tol=10.0^kpow)
             #  tfixP_SH[kNdisc] += @elapsed xP = fixPointOfMapping(mappingFull)
             domoreSH = tmake_SH_PhiALL[kNdisc] < Twaitfor_SH * Naver
+        else
+            tmake_SH_PhiALL[kNdisc] =NaN; 
+            teig_SH[kNdisc]=NaN;
         end
 
         ##mappingLR = DiscreteMapping_LR(mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true)#The discrete mapping of the system
@@ -165,14 +189,13 @@ for kNdisc in vcat([1,1],1:length(Nv)) #the first is repated to get read of the 
         ##tfixP_LR[kNdisc] = BenchmarkTools.median(t).time / 1e9
 
         tmake_LR[kNdisc] += @elapsed mappingLR = DiscreteMapping_LR(mathieu_lddep, method, τmax, n_steps=Int((T + 100eps(T)) ÷ method.Δt), calculate_additive=true)#The discrete mapping of the system
-        teig_LR[kNdisc] += @elapsed μLR[kNdisc] = spectralRadiusOfMapping(mappingLR)
+        teig_LR[kNdisc] += @elapsed μLR[kNdisc] = spectralRadiusOfMapping(mappingLR,nev=NEV,tol=10.0^kpow)
         # tfixP_LR[kNdisc] += @elapsed xPLR = fixPointOfMapping(mappingLR)
 
     end
 
     tmake_SH_PRi[kNdisc] /= Naver
     tmake_SH_Ci[kNdisc] /= Naver
-    #tmake_SH_Ci[kNdisc] /= Naver
     tmake_SH_PhiALL[kNdisc] /= Naver
     #tmake_SH_PhiALL[kNdisc] -=  tmake_SH_Ci[kNdisc]+tmake_SH_PRi[kNdisc]
     teig_SH[kNdisc] /= Naver
@@ -211,19 +234,23 @@ for kNdisc in vcat([1,1],1:length(Nv)) #the first is repated to get read of the 
     #end
 
 #end
-f1 = (x) -> log(x) ./ log(10)
-f2 = (x) -> log(x) ./ log(10)
-#f1 = (x) -> x
-#f2 = (x) -> x
-fplot=scatter
-fplot! = scatter!
-#fplot=plot
-#fplot!=plot!
+#f1 = (x) -> log(x) ./ log(10)
+#f2 = (x) -> log(x) ./ log(10)
+
+f1 = (x) -> x==0.0 ? NaN : x
+f2 = (x) -> x==0.0 ? NaN : x
+
+
+#fplot=scatter
+#fplot! = scatter!
+fplot = plot
+fplot!  = plot!
+
 fplot(f2.(Nv), f1.(tmake_SH_PRi), labels="tmake_SH_PRi")
 fplot!(f2.(Nv), f1.(tmake_SH_Ci), labels="tmake_SH_Ci")
 #fplot!(f2.(Nv), f1.(tmake_SH_Ci), labels="tmake_SH_Ci")
-fplot!(f2.(Nv), f1.(tmake_SH_PhiALL), labels="tmake_SH_PhiALL")
-fplot!(f2.(Nv), f1.(teig_SH), labels="teig_SH: eigs(prod(...)) only")
+fplot!(f2.(Nv), f1.(tmake_SH_PhiALL), labels="tmake_SH_Phi_1step...prod(...)")
+fplot!(f2.(Nv), f1.(teig_SH), labels="teig_SH: eigs(PHI) only")
 #fplot!(f2.(Nv), f1.(tfixP_SH), labels="teig_SH: fix Point")
 fplot!(f2.(Nv), f1.(tmake_LR), labels="tmake_LR", linewidth=2)
 fplot!(f2.(Nv), f1.(teig_LR), labels="teig_LR: eigs(ΦR,ΦL) only", linewidth=2)
@@ -231,17 +258,42 @@ fplot!(f2.(Nv), f1.(teig_LR), labels="teig_LR: eigs(ΦR,ΦL) only", linewidth=2)
 
 #fplot!(xticks =collect( 10 .^(1:0.25:5))) 
 #fplot!(yticks =collect( 10.0.^ (-5:1:5))) 
-#fplot!(yaxis=:log10) 
-#fplot!(xaxis=:log10)
+fplot!(yaxis=:log10 )
+fplot!(xaxis=:log10)
 fplot!(gridlinewidth=2)
 display(
     fplot!(labels="teig_LR: fix Point",
-        xlabel=L"number of steps, log_{10}(N)", ylabel=L"log_{10}(time)", legend=:bottomright)
+        xlabel=L"number of steps, (N)", ylabel=L"CPU-time", legend=:bottomright)
 )
 
 
 end
 5 + 5
+
+
+fplot = plot
+fplot!  = plot!
+
+fplot(f2.(Nv), f1.(tmake_SH_PRi), labels="tmake_SH_PRi")
+fplot!(f2.(Nv), f1.(tmake_SH_Ci), labels="tmake_SH_Ci")
+#fplot!(f2.(Nv), f1.(tmake_SH_Ci), labels="tmake_SH_Ci")
+fplot!(f2.(Nv), f1.(tmake_SH_PhiALL), labels="tmake_SH_Phi_1step...prod(...)")
+fplot!(f2.(Nv), f1.(teig_SH), labels="teig_SH: eigs(PHI) only")
+#fplot!(f2.(Nv), f1.(tfixP_SH), labels="teig_SH: fix Point")
+fplot!(f2.(Nv), f1.(tmake_LR), labels="tmake_LR", linewidth=2)
+fplot!(f2.(Nv), f1.(teig_LR), labels="teig_LR: eigs(ΦR,ΦL) only", linewidth=2)
+#fplot!(f2.(Nv), f1.(tfixP_LR))
+
+#fplot!(xticks =collect( 10 .^(1:0.25:5))) 
+#fplot!(yticks =collect( 10.0.^ (-5:1:5))) 
+fplot!(yaxis=:log10 )
+fplot!(xaxis=:log10)
+fplot!(gridlinewidth=2)
+display(
+    fplot!(labels="teig_LR: fix Point",
+        xlabel=L"number of steps, (N)", ylabel=L"CPU-time", legend=:bottomright)
+)
+
 #####@show norm(μSH - μLR)
 #####
 #####
