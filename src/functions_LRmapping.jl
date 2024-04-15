@@ -98,10 +98,16 @@ function DiscreteMappingSteps_LR(rst::AbstractResult{d}) where {d}
 end
 
 
-function spectralRadiusOfMapping(mappLR::DiscreteMapping_LR; args...)
-    return abs(eigs(mappLR.RmappingMX, mappLR.LmappingMX; args...)[1][1])
+function spectralRadiusOfMapping(mappLR::DiscreteMapping_LR{tT,mxT,vT}; args...)::mxT.parameters[1] where {tT,mxT,vT}
+   # if size(mappLR.LmappingMX,1)>30
+        #println("Full")
+    #    return abs(eigen(collect(mappLR.RmappingMX),collect(mappLR.LmappingMX),sortby=abs).values[end])
+    #else
+    #    #println("SP")
+    return abs(eigs(mappLR.RmappingMX, mappLR.LmappingMX; args...)[1][1])::mxT.parameters[1]
+    #end
 end
 
-function fixPointOfMapping(mappLR::DiscreteMapping_LR)
+function fixPointOfMapping(mappLR::DiscreteMapping_LR{tT,mxT,vT}) where {tT,mxT,vT}
     (mappLR.LmappingMX - mappLR.RmappingMX) \ Vector(mappLR.mappingVs[1])
 end
