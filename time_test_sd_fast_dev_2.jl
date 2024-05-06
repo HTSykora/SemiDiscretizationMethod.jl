@@ -1,6 +1,8 @@
 ######Product-Free full mapping
 ######The mapping is repsented by a left and a right matrix
- 5+5
+## Time-complexity measurements for a publication
+
+5+5
 ###import Pkg
 ########
 ###Pkg.activate("")
@@ -66,7 +68,6 @@ BenchmarkTools.median(t).time / 1e9
 @benchmark abs(eigs(mappingLR.RmappingMX, mappingLR.LmappingMX)[1][1])
 @benchmark abs(eigen(collect(mappingLR.RmappingMX),collect(mappingLR.LmappingMX),sortby=abs).values[end])
 
-eigen(collect(M))
 #tiem of eig test for different precision-------
 tt = []
 muerror = []

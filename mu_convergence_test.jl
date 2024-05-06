@@ -62,7 +62,7 @@ mui = zeros(size(NSD_orderv, 1), size(Nv, 1))
 
 scatter()
 for (iord, NSD_order) in enumerate(NSD_orderv)
-
+a
 
 
     for kNdisc in vcat([1, 1], 1:length(Nv)) #the first is repated to get read of the first compliation time
