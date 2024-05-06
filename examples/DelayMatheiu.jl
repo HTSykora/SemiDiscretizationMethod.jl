@@ -1,5 +1,6 @@
-5 + 5
-using Revise
+
+
+
 using SemiDiscretizationMethod
 
 function createMathieuProblem(δ, ε, b0, a1; T=2π)
@@ -11,12 +12,11 @@ function createMathieuProblem(δ, ε, b0, a1; T=2π)
 end;
 
 τmax = 2π # the largest τ of the system
-T = 3π #Principle period of the system (sin(t)=sin(t+P)) 
+T = 2π #Principle period of the system (sin(t)=sin(t+P)) 
 mathieu_lddep = createMathieuProblem(3.0, 0.2, -0.15, 0.1, T=T); # LDDE problem for Hayes equation
 method = SemiDiscretization(0, 0.05) # 3rd order semi discretization with Δt=0.1
-# if P = τmax, then n_steps is automatically calculated
-@time mapping = DiscreteMapping(mathieu_lddep, method, τmax,
-    n_steps=Int((T + 100eps(T)) ÷ method.Δt), calculate_additive=true); #The discrete mapping of the system
+# if T = τmax, then n_steps is automatically calculated
+@time mapping = DiscreteMapping(mathieu_lddep, method, τmax, n_steps=Int((T + 100eps(T)) ÷ method.Δt), calculate_additive=true); #The discrete mapping of the system
 @time mapping_LR = DiscreteMapping_LR(mathieu_lddep, method, τmax,
     n_steps=Int((T + 100eps(T)) ÷ method.Δt), calculate_additive=true); #The discrete mapping of the system
 
@@ -27,7 +27,6 @@ method = SemiDiscretization(0, 0.05) # 3rd order semi discretization with Δt=0.
 # stationary solution of the hayes equation (equilibrium position)
 @time fp = fixPointOfMapping(mapping);
 @time fp_LR = fixPointOfMapping(mapping_LR);
-
 
 
 
@@ -43,16 +42,16 @@ p = length(fp_LR[1:2:end])
 plot!((0:p-1) .* method.Δt, fp_LR[2:2:end], xlabel="-s", label=L"\dot{x}_{LR}(t-s)")
 plot!((0:p-1) .* method.Δt, fp_LR[1:2:end], xlabel=L"-s", title=L"t \in [nP,(n+1)P],\quad n \to \infty", guidefontsize=14, linewidth=3, label=L"x_{LR}(t-s)", legendfontsize=11, tickfont=font(10))
 
-plot!(0.0:method.Δt:T,sin.(4pi*(0.0:method.Δt:T)./T),label=L"sin(4\pi  t /T)")
+plot!(0.0:method.Δt:T, sin.(4pi * (0.0:method.Δt:T) ./ T), label=L"sin(4\pi  t /T)")
 
 
 #--------- Stability map ----------
 using MDBM
 
-a1=0.1;
-ε=1;
-τmax=2π;
-T=2π;
+a1 = 0.1;
+ε = 1;
+τmax = 2π;
+T = 1π;
 method = SemiDiscretization(2, T / 40);
 
 foo(δ, b0) = log(spectralRadiusOfMapping(DiscreteMapping_LR(createMathieuProblem(δ, ε, b0, a1, T=T), method, τmax,
@@ -70,7 +69,7 @@ scatter(stab_border_points...,
 
 
 
-#--------- 3D stability map ----------
+#--------- Stability map of the Mathieu equation (no delay)----------
 using MDBM
 
 a1 = 0.01;
@@ -93,7 +92,7 @@ scatter(stab_border_points...,
     guidefontsize=14, tickfont=font(10), markersize=2, markerstrokewidth=0)
 
 
-#--------- Stability map ----------
+#--------- 3D stability map ----------
 using MDBM
 plotly()
 a1 = 0.01;
