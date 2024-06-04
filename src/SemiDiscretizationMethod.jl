@@ -25,8 +25,6 @@ Delay,DelayMX,
 Additive,
 LDDEProblem,
 DiscreteMapping, DiscreteMapping_1step,
-fixPointOfMapping, spectralRadiusOfMapping,
-DiscreteMapping_LR
-
-
+DiscreteMapping_LR,
+fixPointOfMapping, spectralRadiusOfMapping
 end # module

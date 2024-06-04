@@ -2,21 +2,22 @@ using SemiDiscretizationMethod
 
 function createHayesProblem(a,b)
     AMx =  ProportionalMX(a*ones(1,1));
-    τ1=1.
+    τ1=1. 
     BMx1 = DelayMX(τ1,b*ones(1,1));
     cVec = Additive(ones(1))
     LDDEProblem(AMx,[BMx1],cVec)
 end
 
 hayes_lddep=createHayesProblem(-1.,-1.); # LDDE problem for Hayes equation
-method=SemiDiscretization(1,0.1) # 3rd order semi discretization with Δt=0.1
+method=SemiDiscretization(1,0.1) # 1st order semi discretization with Δt=0.1
 τmax=1. # the largest τ of the system
 mapping=DiscreteMapping_LR(hayes_lddep,method,τmax,n_steps=1,calculate_additive=true); #The discrete mapping of the system
 
 @show spectralRadiusOfMapping(mapping); # spectral radius ρ of the mapping matrix (ρ>1 unstable, ρ<1 stable)
 @show fixPointOfMapping(mapping); # stationary solution of the hayes equation (equilibrium position)
 
-
+# spectralRadiusOfMapping(mapping) = 0.941189374166563
+# fixPointOfMapping(mapping) = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
 
 
 using MDBM
@@ -24,7 +25,6 @@ using MDBM
 using Plots
 gr();
 using LaTeXStrings
-
 method=SemiDiscretization(4,0.1);
 τmax=1.
 

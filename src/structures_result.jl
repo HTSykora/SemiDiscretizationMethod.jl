@@ -14,6 +14,8 @@ struct SubMX{mT} <: subArray{mT}
 end
 SubMX(range::Tuple{<:AbstractVector,<:AbstractVector}, MX::SMatrix{<:Real}) = SubMX([range], [MX])
 SubMX(range::Tuple{<:AbstractVector,<:AbstractVector}, MX::AbstractMatrix{<:Real}) = SubMX([range], [MX])
+
+
 struct SubV{vT} <: subArray{vT}
     V::vT
 end
