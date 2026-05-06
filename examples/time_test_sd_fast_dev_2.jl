@@ -2,7 +2,7 @@
 ######The mapping is repsented by a left and a right matrix
 ## Time-complexity measurements for a publication
 
-5+5
+5 + 5
 ###import Pkg
 ########
 ###Pkg.activate("")
@@ -42,7 +42,8 @@ end
 Ndisc = 200
 
 τmax = 2π # the largest τ of the system
-T = 20π #Principle period of the system (sin(t)=cos(t+T)) 
+# T = 20π #Principle period of the system (sin(t)=cos(t+T)) 
+T = 2π #Principle period of the system (sin(t)=cos(t+T)) 
 mathieu_lddep = createMathieuProblem(3.0, 3.0, -0.5, 0.2, T=T) # LDDE problem for Hayes equation
 method = SemiDiscretization(5, T / Ndisc) # 3rd order semi discretization with Δt=0.1
 Nsteps = Int((T + 100eps(T)) ÷ method.Δt)
@@ -66,7 +67,7 @@ BenchmarkTools.median(t).time / 1e9
 
 
 @benchmark abs(eigs(mappingLR.RmappingMX, mappingLR.LmappingMX)[1][1])
-@benchmark abs(eigen(collect(mappingLR.RmappingMX),collect(mappingLR.LmappingMX),sortby=abs).values[end])
+@benchmark abs(eigen(collect(mappingLR.RmappingMX), collect(mappingLR.LmappingMX), sortby=abs).values[end])
 
 #tiem of eig test for different precision-------
 tt = []
@@ -79,7 +80,6 @@ for kpow in kpowv
     println(μ - μLR)
 end
 scatter(tt, log.(abs.(muerror)))
-#scatter!(tt,log.(abs.(muerror)))
 #scatter(kpowv,log.(abs.(muerror)))
 #scatter!(tt,kpowv)
 
@@ -116,7 +116,15 @@ Twaitfor_SH = 10.0;
 
 BenchmarkTools.DEFAULT_PARAMETERS.samples = 50.0
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 0.1
+
+@warn " Fast test, remove this line!!!!"
+BenchmarkTools.DEFAULT_PARAMETERS.samples = 1.0
+BenchmarkTools.DEFAULT_PARAMETERS.seconds = 0.01
+
 Nv = ceil.(10 .^ (1.0:0.025:3.00))
+
+@warn " Fast test, remove this line!!!!"
+Nv = ceil.(10 .^ (1.6:0.25:3.00))
 Twaitfor_SH = 1.0;
 
 kpow = 1e-4
@@ -149,12 +157,12 @@ tmake_LR = zeros(Float64, length(Nv));
 teig_LR = zeros(Float64, length(Nv));
 tfixP_LR = zeros(Float64, length(Nv));
 μLR = zeros(Float64, length(Nv));
-fixLR= zeros(Float64, length(Nv));
+fixLR = zeros(Float64, length(Nv));
 #deviation
 tmake_LR_S = zeros(Float64, length(Nv));
 teig_LR_S = zeros(Float64, length(Nv));
 tfixP_LR_S = zeros(Float64, length(Nv));
-fixLR_S= zeros(Float64, length(Nv));
+fixLR_S = zeros(Float64, length(Nv));
 
 
 f1 = (x) -> log(x) ./ log(10)
@@ -163,6 +171,7 @@ f2 = (x) -> log(x) ./ log(10)
 #kNdisc=10
 #@profview  
 for kNdisc in vcat([1, 1], 1:length(Nv)) #the first is repated to get read of the first compliation time
+    global f1, f2, domoreSH_PR, domoreSH
     if kNdisc == 1
         tmake_SH_PRi[kNdisc] = 0.0
         tmake_SH_Ci[kNdisc] = 0.0
@@ -186,7 +195,7 @@ for kNdisc in vcat([1, 1], 1:length(Nv)) #the first is repated to get read of th
     #@show Naver = maximum([ceil(4 - (log(Ndisc) / log(10))) * 2, 1])
     @show Naver = 1
     τmax = 2π # the largest τ of the system
-    T = 20π #Principle period of the system (sin(t)=cos(t+T)) 
+    T = 20*π #Principle period of the system (sin(t)=cos(t+T)) 
     mathieu_lddep = createMathieuProblem(3.0, 3.0, -0.5, 0.2, T=T) # LDDE problem for Hayes equation
 
     method = SemiDiscretization(1, T / Ndisc) # 3rd order semi discretization with Δt=0.1
@@ -296,8 +305,9 @@ for kNdisc in vcat([1, 1], 1:length(Nv)) #the first is repated to get read of th
     #@show norm(xP-xPLR)
     #plot(xP[1:2:end])
     #plot!(xPLR[1:2:end])
-
-    # @show norm(μSH[kNdisc]-μLR[kNdisc])
+    println("------------------------------------------------------------")
+    println("norm of the difference of the fixed points: ")
+    @show norm(μSH[kNdisc] - μLR[kNdisc])
 
     #if (kNdisc>5000  ||  mod(kNdisc,10)==0)
     df = DataFrame(
@@ -308,7 +318,7 @@ for kNdisc in vcat([1, 1], 1:length(Nv)) #the first is repated to get read of th
         tmake_LR_data=tmake_LR,
         teig_LR_data=teig_LR,
         tfixP_LR_data=tfixP_LR,
-        Nv_data_log=f2.(Nv),
+        Nv_data_log=f1.(Nv),
         tmake_SH_data_log=f1.(tmake_SH_PhiALL),
         teig_SH_data_log=f1.(teig_SH),
         tfixP_SH_data_log=f1.(tfixP_SH),
@@ -321,7 +331,7 @@ for kNdisc in vcat([1, 1], 1:length(Nv)) #the first is repated to get read of th
     #end
 
 
-    
+
 
     tmake_SH_PRi_S[isnan.(tmake_SH_PRi_S)] .= 0.0
     tmake_SH_Ci_S[isnan.(tmake_SH_Ci_S)] .= 0.0
@@ -332,60 +342,78 @@ for kNdisc in vcat([1, 1], 1:length(Nv)) #the first is repated to get read of th
     tmake_LR_S[isnan.(tmake_LR_S)] .= 0.0
     teig_LR_S[isnan.(teig_LR_S)] .= 0.0
     fixLR_S[isnan.(fixLR_S)] .= 0.0
-    
+
 
     #f1 = (x) -> log(x) ./ log(10)
     #f2 = (x) -> log(x) ./ log(10)
 
-f1 = (x) -> x == 0.0 ? NaN : x
-f2 = (x) -> x == 0.0 ? NaN : x
+    f1 = (x) -> x == 0.0 ? NaN : x
+    f2 = (x) -> x == 0.0 ? NaN : x
 
-ScaleSTD=0.5
+    ScaleSTD = 0.5
 
-#fplot=scatter
-#fplot! = scatter!
-fplot = plot
-fplot! = plot!
+    #fplot=scatter
+    #fplot! = scatter!
+    fplot = plot
+    fplot! = plot!
 
-#fplot(f2.(Nv), f1.(tmake_SH_PRi .+tmake_SH_PRi_S), labels="tmake_SH_PRi")
-#fplot!(f2.(Nv), f1.(tmake_SH_PRi ), labels="tmake_SH_PRi")
-#fplot!(f2.(Nv), f1.(tmake_SH_PRi .-tmake_SH_PRi_S), labels="tmake_SH_PRi")
-fplot(f2.(Nv), f1.(tmake_SH_PRi), ribbon=tmake_SH_PRi_S .* ScaleSTD, labels="tmake_SH_PRi")
-fplot!(f2.(Nv), f1.(tmake_SH_Ci), ribbon=tmake_SH_Ci_S .* ScaleSTD, labels="tmake_SH_Ci")
-#fplot!(f2.(Nv), f1.(tmake_SH_Ci),ribbon=tmake_SH_Ci_S .* ScaleSTD, labels="tmake_SH_Ci")
-fplot!(f2.(Nv), f1.(tmake_SH_PhiALL), ribbon=tmake_SH_PhiALL_S .* ScaleSTD, labels="tmake_SH_Phi_1step...prod(...)")
-fplot!(f2.(Nv), f1.(teig_SH), ribbon=teig_SH_S .* ScaleSTD, labels="teig_SH: eigs(PHI) only")
-#fplot!(f2.(Nv), f1.(tfixP_SH),ribbon=tfixP_SH_S .* ScaleSTD, labels="teig_SH: fix Point")
-fplot!(f2.(Nv), f1.(tmake_LR), ribbon=tmake_LR_S .* ScaleSTD, labels="tmake_LR", linewidth=2)
-fplot!(f2.(Nv), f1.(teig_LR), ribbon=teig_LR_S .* ScaleSTD, labels="teig_LR: eigs(ΦR,ΦL) only", linewidth=2)
+    #fplot(f2.(Nv), f1.(tmake_SH_PRi .+tmake_SH_PRi_S), labels="tmake_SH_PRi")
+    #fplot!(f2.(Nv), f1.(tmake_SH_PRi ), labels="tmake_SH_PRi")
+    #fplot!(f2.(Nv), f1.(tmake_SH_PRi .-tmake_SH_PRi_S), labels="tmake_SH_PRi")
+    fplot(f2.(Nv), f1.(tmake_SH_PRi), ribbon=tmake_SH_PRi_S .* ScaleSTD, labels="tmake_SH_PRi")
+    fplot!(f2.(Nv), f1.(tmake_SH_Ci), ribbon=tmake_SH_Ci_S .* ScaleSTD, labels="tmake_SH_Ci")
+    #fplot!(f2.(Nv), f1.(tmake_SH_Ci),ribbon=tmake_SH_Ci_S .* ScaleSTD, labels="tmake_SH_Ci")
+    fplot!(f2.(Nv), f1.(tmake_SH_PhiALL), ribbon=tmake_SH_PhiALL_S .* ScaleSTD, labels="tmake_SH_Phi_1step...prod(...)")
+    fplot!(f2.(Nv), f1.(teig_SH), ribbon=teig_SH_S .* ScaleSTD, labels="teig_SH: eigs(PHI) only")
+    #fplot!(f2.(Nv), f1.(tfixP_SH),ribbon=tfixP_SH_S .* ScaleSTD, labels="teig_SH: fix Point")
+    fplot!(f2.(Nv), f1.(tmake_LR), ribbon=tmake_LR_S .* ScaleSTD, labels="tmake_LR", linewidth=2)
+    fplot!(f2.(Nv), f1.(teig_LR), ribbon=teig_LR_S .* ScaleSTD, labels="teig_LR: eigs(ΦR,ΦL) only", linewidth=2)
 
-fplot!(f2.(Nv), f1.(fixSH), ribbon=fixSH_S .* ScaleSTD, labels="fixSH", linewidth=1)
-fplot!(f2.(Nv), f1.(fixLR), ribbon=fixLR_S .* ScaleSTD, labels="fixLR", linewidth=2)
+    fplot!(f2.(Nv), f1.(fixSH), ribbon=fixSH_S .* ScaleSTD, labels="fixSH", linewidth=1)
+    fplot!(f2.(Nv), f1.(fixLR), ribbon=fixLR_S .* ScaleSTD, labels="fixLR", linewidth=2)
 
-#fplot!(xticks =collect( 10 .^(1:0.25:5))) 
-#fplot!(yticks =collect( 10.0.^ (-5:1:5))) 
-fplot!(yaxis=(:log10, [0.00001, :auto]))
-fplot!(xaxis=:log10)
-fplot!(gridlinewidth=2)
-display(
-    fplot!(labels="teig_LR: fix Point",
-        xlabel=L"number of steps, (N)", ylabel=L"CPU-time", legend=:bottomright,
-        xticks=10.0 .^ (1:6), yticks=10.0 .^ (-5:3))
-)
-    
-    savefig( "myplot3.svg") 
+    #fplot!(xticks =collect( 10 .^(1:0.25:5))) 
+    #fplot!(yticks =collect( 10.0.^ (-5:1:5))) 
+    fplot!(yaxis=(:log10, [0.00001, :auto]))
+    fplot!(xaxis=:log10)
+    fplot!(gridlinewidth=2)
+    display(
+        fplot!(labels="teig_LR: fix Point",
+            xlabel=L"number of steps, (N)", ylabel=L"CPU-time", legend=:bottomright,
+            xticks=10.0 .^ (1:6), yticks=10.0 .^ (-5:3))
+    )
+
+    savefig("myplot3.svg")
+
+
+
+            println("------------------ error of the spectral radius at $Ndisc steps: ------------------")
+        @show norm(μLR[kNdisc] - μSH[kNdisc])
+
+     #   println("------------------ error of the fixpoint radius at $Ndisc steps: ------------------")
+     #   xPLR = fixPointOfMapping(mappingLR)
+     #   xP = fixPointOfMapping(mappingFull)
+     #   plot(xP[1:2:end])
+     #   display(plot!(-xPLR[1:2:length(xP)]))
+#
+#
+     #   #   plot(xP[1:2:end]+xPLR[1:2:length(xP)]) 
+     #   #     @show length(xPLR)
+     #   #     @show length(xP)
+     #   @show norm(xP[1:2:end] + xPLR[1:2:length(xP)]) / length(xP)
+     #   @show maximum(abs.(xP[1:2:end] + xPLR[1:2:length(xP)]))
 end
 
 
-tmake_SH_PRi_S .= [-maximum([-a*0.99, -b]) for (a, b) in zip(tmake_SH_PRi, tmake_SH_PRi_S)]
-tmake_SH_Ci_S .= [-maximum([-a*0.99, -b]) for (a, b) in zip(tmake_SH_Ci, tmake_SH_Ci_S)]
-tmake_SH_PhiALL_S .= [-maximum([-a*0.99, -b]) for (a, b) in zip(tmake_SH_PhiALL, tmake_SH_PhiALL_S)]
-teig_SH_S .= [-maximum([-a*0.99, -b]) for (a, b) in zip(teig_SH, teig_SH_S)]
-fixSH_S .= [-maximum([-a*0.99, -b]) for (a, b) in zip(fixSH, fixSH_S)]
+tmake_SH_PRi_S .= [-maximum([-a * 0.99, -b]) for (a, b) in zip(tmake_SH_PRi, tmake_SH_PRi_S)]
+tmake_SH_Ci_S .= [-maximum([-a * 0.99, -b]) for (a, b) in zip(tmake_SH_Ci, tmake_SH_Ci_S)]
+tmake_SH_PhiALL_S .= [-maximum([-a * 0.99, -b]) for (a, b) in zip(tmake_SH_PhiALL, tmake_SH_PhiALL_S)]
+teig_SH_S .= [-maximum([-a * 0.99, -b]) for (a, b) in zip(teig_SH, teig_SH_S)]
+fixSH_S .= [-maximum([-a * 0.99, -b]) for (a, b) in zip(fixSH, fixSH_S)]
 
-tmake_LR_S .= [-maximum([-a*0.99, -b]) for (a, b) in zip(tmake_LR, tmake_LR_S)]
-teig_LR_S .= [-maximum([-a*0.99, -b]) for (a, b) in zip(teig_LR, teig_LR_S)]
-fixLR_S .= [-maximum([-a*0.99, -b]) for (a, b) in zip(fixLR, fixLR_S)]
+tmake_LR_S .= [-maximum([-a * 0.99, -b]) for (a, b) in zip(tmake_LR, tmake_LR_S)]
+teig_LR_S .= [-maximum([-a * 0.99, -b]) for (a, b) in zip(teig_LR, teig_LR_S)]
+fixLR_S .= [-maximum([-a * 0.99, -b]) for (a, b) in zip(fixLR, fixLR_S)]
 
 
 
@@ -402,7 +430,7 @@ fixLR_S .= [-maximum([-a*0.99, -b]) for (a, b) in zip(fixLR, fixLR_S)]
 f1 = (x) -> x == 0.0 ? NaN : x
 f2 = (x) -> x == 0.0 ? NaN : x
 
-ScaleSTD=0.5
+ScaleSTD = 0.5
 
 #fplot=scatter
 #fplot! = scatter!
@@ -435,37 +463,37 @@ fplot!(gridlinewidth=2)
 
 
 
-function power_fit(x::Vector{Float64}, y::Vector{Float64},N)
-    ynew=deepcopy(y[x .>N])
-    xnew=deepcopy(x[x .> N])
-    xnew=(xnew[.!isnan.(ynew)])
-    ynew=(ynew[.!isnan.(ynew)])
+function power_fit(x::Vector{Float64}, y::Vector{Float64}, N)
+    ynew = deepcopy(y[x.>N])
+    xnew = deepcopy(x[x.>N])
+    xnew = (xnew[.!isnan.(ynew)])
+    ynew = (ynew[.!isnan.(ynew)])
     logx = log.(xnew)
     logy = log.(ynew)
-    
+
     # Linear fit to the transformed problem
     X = hcat(ones(length(logx)), logx)
     β = X \ logy  # Solves for log(c) and p
-    
+
     c = exp(β[1])  # Convert back from log(c) to c
     p = β[2]
-    
+
     # Calculate fitted y values using the original x values
     fitted_y = c .* xnew .^ p
-    println([c,p])
-    return xnew,fitted_y #c, p, 
+    println([c, p])
+    return xnew, fitted_y #c, p, 
 end
 
-fplot!(power_fit(Nv, tmake_SH_PRi,1e2)...,  labels="", linewidth=1, linecolor=:black, linestyle=:dash)
-fplot!(power_fit(Nv, tmake_SH_Ci,1e2)...,  labels="", linewidth=1, linecolor=:black, linestyle=:dash)
-fplot!(power_fit(Nv, tmake_SH_PhiALL,1e2)...,  labels="", linewidth=1, linecolor=:black, linestyle=:dash)
-fplot!(power_fit(Nv, teig_SH,700)...,  labels="", linewidth=1, linecolor=:black, linestyle=:dash)
+fplot!(power_fit(Nv, tmake_SH_PRi, 1e2)..., labels="", linewidth=1, linecolor=:black, linestyle=:dash)
+fplot!(power_fit(Nv, tmake_SH_Ci, 1e2)..., labels="", linewidth=1, linecolor=:black, linestyle=:dash)
+fplot!(power_fit(Nv, tmake_SH_PhiALL, 1e2)..., labels="", linewidth=1, linecolor=:black, linestyle=:dash)
+fplot!(power_fit(Nv, teig_SH, 700)..., labels="", linewidth=1, linecolor=:black, linestyle=:dash)
 
-fplot!(power_fit(Nv, tmake_LR,1e2)...,  labels="", linewidth=1, linecolor=:black, linestyle=:dash)
-fplot!(power_fit(Nv, teig_LR,1e2)...,  labels="", linewidth=1, linecolor=:black, linestyle=:dash)
+fplot!(power_fit(Nv, tmake_LR, 1e2)..., labels="", linewidth=1, linecolor=:black, linestyle=:dash)
+fplot!(power_fit(Nv, teig_LR, 1e2)..., labels="", linewidth=1, linecolor=:black, linestyle=:dash)
 
-fplot!(power_fit(Nv, fixSH,1e2)...,  labels="", linewidth=1, linecolor=:black, linestyle=:dash)
-fplot!(power_fit(Nv, fixLR,1e2)...,  labels="", linewidth=1, linecolor=:black, linestyle=:dash)
+fplot!(power_fit(Nv, fixSH, 1e2)..., labels="", linewidth=1, linecolor=:black, linestyle=:dash)
+fplot!(power_fit(Nv, fixLR, 1e2)..., labels="", linewidth=1, linecolor=:black, linestyle=:dash)
 
 
 display(
@@ -475,4 +503,4 @@ display(
 )
 
 
-savefig( "myplot_final32STD05_T20pi_2__eigs_test.svg") 
+savefig("myplot_final32STD05_T20pi_2__eigs_test.svg")

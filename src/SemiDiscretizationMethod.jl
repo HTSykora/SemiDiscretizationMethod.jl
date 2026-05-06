@@ -5,6 +5,9 @@ using Reexport
 @reexport using SparseArrays
 @reexport using StaticArrays
 @reexport using Arpack
+
+using ForwardDiff
+using KrylovKit
 using QuadGK
 using Lazy: iterated, take
 
@@ -17,7 +20,7 @@ include("functions_discretization.jl")
 include("functions_method.jl")
 
 include("functions_LRmapping.jl")
-
+include("sdm_periodic_sol.jl")
 
 export SemiDiscretization, NumericSD, 
 ProportionalMX,
@@ -26,5 +29,6 @@ Additive,
 LDDEProblem,
 DiscreteMapping, DiscreteMapping_1step,
 DiscreteMapping_LR,
-fixPointOfMapping, spectralRadiusOfMapping
+fixPointOfMapping, spectralRadiusOfMapping,
+extract_SDM_system,get_periodic_solution
 end # module
