@@ -1,12 +1,14 @@
-###### Multiplication-Free Semi-Discretization Method for Time-Periodic Delayed Systems
-###### The mapping is repsented by a left and a right matrix
+######Product-Free full mapping
+######The mapping is repsented by a left and a right matrix
 ## Time-complexity measurements for a publication
-# this code generates the figures in the 
-#   Bachrathy. D
-#   Linear Time Complexity Analysis of Time-Periodic Delayed Systems with Multiplication Free Semi-Discretization Method
-#   Journal of Vibration and Control,2026 
 
-using Revise
+5 + 5
+###import Pkg
+########
+###Pkg.activate("")
+######### Pkg.activate()# ez az eredeti, mindent tartalamzo
+#########] dev SemiDiscretizationMethod
+
 using SemiDiscretizationMethod
 using StaticArrays
 using Plots
@@ -16,7 +18,6 @@ using DataFrames
 using BenchmarkTools
 
 using LaTeXStrings
-Threads.nthreads()
 
 
 function createMathieuProblem(δ, ε, b0, a1; T=2π)
@@ -26,7 +27,7 @@ function createMathieuProblem(δ, ε, b0, a1; T=2π)
     #τ1 =τ1 = t->0.5π-0.5π*cos(2π / T * t * 2) 
     #τ1 = τ1 = t -> 2π - 0.5π * (t / T)
     τ1 = τ1 = t -> 2π
-    BMx1 = DelayMX(τ1, t -> @SMatrix [0.0 0.0; b0 0.0])
+    BMx1 = DelayMX(τ1, @SMatrix [0.0 0.0; b0 0.0])
     #τ2=1.0π # if function is needed, the use τ1 = t->foo(t)
     #τ2 = τ1 = t -> 1.0π + 1.0π * (t / T)
     ##TODO: nem ugyan az ha függvény vagy, ha konstans!?!?!?!?! 
@@ -34,15 +35,29 @@ function createMathieuProblem(δ, ε, b0, a1; T=2π)
     cVec = Additive(t -> @SVector [0.0, 1.0 * cos(2π / T * t * 4)])
     #LDDEProblem(AMx, [BMx1, BMx2], cVec)
     LDDEProblem(AMx, BMx1, cVec)
+
+
+    # AMx = ProportionalMX(t -> SMatrix{2,2,Float64}([0.0 1.0; -δ-ε*cos(2π / T * t) -a1])::SMatrix{2,2,Float64})
+    # τ1 = τ1 = t -> Float64(2π)::Float64
+    # BMx1 = DelayMX(τ1, t -> SMatrix{2,2,Float64}([0.0 0.0; b0 0.0])::SMatrix{2,2,Float64})
+    # cVec = Additive(t -> SVector{2,Float64}([0.0, 1.0 * cos(2π / T * t * 4)])::SVector{2,Float64})
+    # LDDEProblem(AMx, BMx1, cVec)
+
+
+
+    # AMx = ProportionalMX(t -> [0.0 1.0; -δ-ε*cos(2π / T * t) -a1])
+    # τ1 = τ1 = t -> Float64(2π)
+    # BMx1 = DelayMX(τ1, t -> [0.0 0.0; b0 0.0])
+    # cVec = Additive(t -> [0.0, 1.0 * cos(2π / T * t * 4)])
+    # LDDEProblem(AMx, BMx1, cVec)
 end
 
 Ndisc = 200
 
 τmax = 2π # the largest τ of the system
-# T = 20π #Principle period of the system (sin(t)=cos(t+T)) 
 T = 2π #Principle period of the system (sin(t)=cos(t+T)) 
 mathieu_lddep = createMathieuProblem(3.0, 3.0, -0.5, 0.2, T=T) # LDDE problem for Hayes equation
-method = SemiDiscretization(5, T / Ndisc) # 5th order semi discretization with Δt=T/Ndisc
+method = SemiDiscretization(5, T / Ndisc) # 3rd order semi discretization with Δt=0.1
 Nsteps = Int((T + 100eps(T)) ÷ method.Δt)
 
 #mappingLR = DiscreteMapping_LR(mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true)#The discrete mapping of the system
@@ -71,13 +86,13 @@ tt = []
 muerror = []
 kpowv = -15:0.25:0
 for kpow in kpowv
-    tloc = @elapsed μ = spectralRadiusOfMapping(mapping, nev=1, tol=10.0^kpow)
-    tloc = @elapsed μLR = spectralRadiusOfMapping(mappingLR, nev=1, tol=10.0^kpow)
+    tloc = @elapsed μLR = spectralRadiusOfMapping(mapping, nev=1, tol=10.0^kpow)
     push!(tt, tloc)
     push!(muerror, μ - μLR)
     println(μ - μLR)
 end
 scatter(tt, log.(abs.(muerror)))
+#scatter!(tt,log.(abs.(muerror)))
 #scatter(kpowv,log.(abs.(muerror)))
 #scatter!(tt,kpowv)
 
@@ -102,7 +117,7 @@ foo(4)
 
 ## --------------- time test -------------------------
 ## -----------------------------------------------------
-
+#Journal
 BenchmarkTools.DEFAULT_PARAMETERS.samples = 1000.0
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 2.0
 
@@ -111,17 +126,17 @@ Nv = ceil.(10 .^ (1.0:0.01:5.61)) #5.61  #100:100:3000
 Nv = ceil.(10 .^ (1.0:0.05:6))
 Twaitfor_SH = 10.0;
 
-
+#Fast(er) test
 BenchmarkTools.DEFAULT_PARAMETERS.samples = 50.0
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 0.1
 
-# @warn " Fast test, remove this line!!!!"
-# BenchmarkTools.DEFAULT_PARAMETERS.samples = 1.0
-# BenchmarkTools.DEFAULT_PARAMETERS.seconds = 0.01
-# 
-# @warn " Fast test, remove this line!!!!"
-# Nv = ceil.(10 .^ (1.6:0.25:3.00))
-# Twaitfor_SH = 1.0;
+#Fast(er) test
+BenchmarkTools.DEFAULT_PARAMETERS.samples = 10.0
+BenchmarkTools.DEFAULT_PARAMETERS.seconds = 0.01
+
+
+#Nv = ceil.(10 .^ (1.0:0.025:3.00))
+#Twaitfor_SH = 1.0;
 
 kpow = 1e-4
 NEV = 1
@@ -145,8 +160,8 @@ tfixP_SH_S = zeros(Float64, length(Nv));
 fixSH_S = zeros(Float64, length(Nv));
 
 
-domoreSH = true;
-domoreSH_PR = true;
+global domoreSH = true;
+global domoreSH_PR = true;
 #@show domoreSH=false;
 
 tmake_LR = zeros(Float64, length(Nv));
@@ -167,7 +182,9 @@ f2 = (x) -> log(x) ./ log(10)
 #kNdisc=10
 #@profview  
 for kNdisc in vcat([1, 1], 1:length(Nv)) #the first is repated to get read of the first compliation time
-    global f1, f2, domoreSH_PR, domoreSH
+
+    global domoreSH
+    global domoreSH_PR
     if kNdisc == 1
         tmake_SH_PRi[kNdisc] = 0.0
         tmake_SH_Ci[kNdisc] = 0.0
@@ -191,13 +208,28 @@ for kNdisc in vcat([1, 1], 1:length(Nv)) #the first is repated to get read of th
     #@show Naver = maximum([ceil(4 - (log(Ndisc) / log(10))) * 2, 1])
     @show Naver = 1
     τmax = 2π # the largest τ of the system
-    T = 20*π #Principle period of the system (sin(t)=cos(t+T)) 
+    T = 20π #Principle period of the system (sin(t)=cos(t+T)) 
     mathieu_lddep = createMathieuProblem(3.0, 3.0, -0.5, 0.2, T=T) # LDDE problem for Hayes equation
-
     method = SemiDiscretization(1, T / Ndisc) # 3rd order semi discretization with Δt=0.1
-
     Nsteps = Int((T + 100eps(T)) ÷ method.Δt)
+
+
+
+
+    #  begin
+    #      @warn "Beam modell is used!!! see the beam_delay_deedbacl.jl file"
+    #      Tper = TperpTspeed * Tspeed
+    #      T=Tper
+    #      #mathieu_lddep=delay_beam_feedback(210e9, 1e-4, 7800, 1.0, 0.01, 6, 0.3, 0.955, 0.0001927248223318863, 6.3, Val(5))
+    #      mathieu_lddep = delay_beam_feedback(E, A, ρ, L, η, N, P, τpTspeed, Tspeed, TperpTspeed, Val(N - 1))
+    #      τmax = τpTspeed * Tspeed
+    #      method = SemiDiscretization(2, Tper / Ndisc) # 3rd order semi discretization with Δt=0.1
+    #      Nsteps = Int((Tper + 100eps(Tper)) ÷ method.Δt)
+    #  end
+
+
     for _ = 1:Naver
+
 
 
         #tmake_SH_PRi[kNdisc] += @elapsed resultPR = SemiDiscretizationMethod.calculateResults(mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true)
@@ -206,7 +238,6 @@ for kNdisc in vcat([1, 1], 1:length(Nv)) #the first is repated to get read of th
         tmake_SH_PRi[kNdisc] += BenchmarkTools.median(t).time / 1e9
         tmake_SH_PRi_S[kNdisc] += BenchmarkTools.std(t).time / 1e9
         resultPR = SemiDiscretizationMethod.calculateResults(mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true)
-
         if domoreSH_PR
             #tmake_SH_Ci[kNdisc] += @elapsed mmpp2 = SemiDiscretizationMethod.DiscreteMappingSteps(resultPR)
             t = @benchmark SemiDiscretizationMethod.DiscreteMappingSteps($resultPR)
@@ -223,6 +254,7 @@ for kNdisc in vcat([1, 1], 1:length(Nv)) #the first is repated to get read of th
         if domoreSH
             println("domoreSH")
             #tmake_SH_PhiALL[kNdisc] += @elapsed mappingFull = DiscreteMapping_1step(mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true) #The discrete mapping of the system
+            DiscreteMapping_1step(mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true)
             t = @benchmark DiscreteMapping_1step($mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true) #The discrete mapping of the system
             @show t
             tmake_SH_PhiALL[kNdisc] += BenchmarkTools.median(t).time / 1e9
@@ -301,30 +333,32 @@ for kNdisc in vcat([1, 1], 1:length(Nv)) #the first is repated to get read of th
     #@show norm(xP-xPLR)
     #plot(xP[1:2:end])
     #plot!(xPLR[1:2:end])
-    println("------------------------------------------------------------")
-    println("norm of the difference of the fixed points: ")
-    @show norm(μSH[kNdisc] - μLR[kNdisc])
 
-   #  #if (kNdisc>5000  ||  mod(kNdisc,10)==0)
-   #  df = DataFrame(
-   #      Nv_data=Nv,
-   #      tmake_SH_data=tmake_SH_PhiALL,
-   #      teig_SH_data=teig_SH,
-   #      tfixP_SH_data=tfixP_SH,
-   #      tmake_LR_data=tmake_LR,
-   #      teig_LR_data=teig_LR,
-   #      tfixP_LR_data=tfixP_LR,
-   #      Nv_data_log=f1.(Nv),
-   #      tmake_SH_data_log=f1.(tmake_SH_PhiALL),
-   #      teig_SH_data_log=f1.(teig_SH),
-   #      tfixP_SH_data_log=f1.(tfixP_SH),
-   #      tmake_LR_data_log=f1.(tmake_LR),
-   #      teig_LR_data_log=f1.(teig_LR),
-   #      tfixP_LR_data_log=f1.(tfixP_LR))
-# 
-   #  CSV.write("CPU_Timev__T_" * string(T) * "_tau_" * string(τmax) * ".csv", df)
-   #  println("data saved")
-   #  #end
+    # @show norm(μSH[kNdisc]-μLR[kNdisc])
+
+    global f1 = (x) -> x == 0.0 ? NaN : x
+    global f2 = (x) -> x == 0.0 ? NaN : x
+
+    #if (kNdisc>5000  ||  mod(kNdisc,10)==0)
+    df = DataFrame(
+        Nv_data=Nv,
+        tmake_SH_data=tmake_SH_PhiALL,
+        teig_SH_data=teig_SH,
+        tfixP_SH_data=tfixP_SH,
+        tmake_LR_data=tmake_LR,
+        teig_LR_data=teig_LR,
+        tfixP_LR_data=tfixP_LR,
+        Nv_data_log=f2.(Nv),
+        tmake_SH_data_log=f1.(tmake_SH_PhiALL),
+        teig_SH_data_log=f1.(teig_SH),
+        tfixP_SH_data_log=f1.(tfixP_SH),
+        tmake_LR_data_log=f1.(tmake_LR),
+        teig_LR_data_log=f1.(teig_LR),
+        tfixP_LR_data_log=f1.(tfixP_LR))
+
+    CSV.write("CPU_Timev__T_" * string(T) * "_tau_" * string(τmax) * ".csv", df)
+    println("data saved")
+    #end
 
 
 
@@ -343,8 +377,6 @@ for kNdisc in vcat([1, 1], 1:length(Nv)) #the first is repated to get read of th
     #f1 = (x) -> log(x) ./ log(10)
     #f2 = (x) -> log(x) ./ log(10)
 
-    f1 = (x) -> x == 0.0 ? NaN : x
-    f2 = (x) -> x == 0.0 ? NaN : x
 
     ScaleSTD = 0.5
 
@@ -379,25 +411,7 @@ for kNdisc in vcat([1, 1], 1:length(Nv)) #the first is repated to get read of th
             xticks=10.0 .^ (1:6), yticks=10.0 .^ (-5:3))
     )
 
-    savefig("myplot3.svg")
-
-
-
-            println("------------------ error of the spectral radius at $Ndisc steps: ------------------")
-        @show norm(μLR[kNdisc] - μSH[kNdisc])
-
-     #   println("------------------ error of the fixpoint radius at $Ndisc steps: ------------------")
-     #   xPLR = fixPointOfMapping(mappingLR)
-     #   xP = fixPointOfMapping(mappingFull)
-     #   plot(xP[1:2:end])
-     #   display(plot!(-xPLR[1:2:length(xP)]))
-#
-#
-     #   #   plot(xP[1:2:end]+xPLR[1:2:length(xP)]) 
-     #   #     @show length(xPLR)
-     #   #     @show length(xP)
-     #   @show norm(xP[1:2:end] + xPLR[1:2:length(xP)]) / length(xP)
-     #   @show maximum(abs.(xP[1:2:end] + xPLR[1:2:length(xP)]))
+    #  savefig("myplot3.svg")
 end
 
 
@@ -499,4 +513,4 @@ display(
 )
 
 
-#savefig("myplot_final32STD05_T20pi_2__eigs_test.svg")
+savefig("myplot_final32STD05_T20pi_2__eigs_test.svg")

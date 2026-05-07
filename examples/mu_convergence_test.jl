@@ -79,7 +79,7 @@ p3 = scatter(yaxis=:log10, xaxis=:log10, xlabel=L"number of steps, (N)", ylabel=
     err = abs.(mui[iord, :] .- μLR_ref)
 
     # Estimate convergence rate avoiding round-off plateau
-    valid_idx = findall(err .> 1e-11 && err .< 1e-3)
+    valid_idx = findall((err .> 1e-11) .& (err .< 1e-3))
     if length(valid_idx) >= 2
         x_fit = log10.(Nv[valid_idx])
         y_fit = log10.(err[valid_idx])
