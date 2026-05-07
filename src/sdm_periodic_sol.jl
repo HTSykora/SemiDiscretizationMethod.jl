@@ -49,35 +49,27 @@ function (sol::PeriodicSolution{d})(t_call) where d
     
     if sol.order == 0
         return sol.u[idx]
-    elseif sol.order == 1
-        # Linear interpolation between steps
-        t0, t1 = sol.t[idx], sol.t[idx+1]
-        u0, u1 = sol.u[idx], sol.u[idx+1]
-        
-        weight = (t_loc - t0) / (t1 - t0)
-        return u0 + weight .* (u1 - u0)
     else
-        # Higher order Lagrange interpolation matching SDM logic
-        # sol.u[1] is x(0), sol.u[2] is x(Δt), ..., sol.u[p+1] is x(T)
-        # For a point in [t_idx, t_{idx+1}], we use u[idx], u[idx-1], ..., u[idx-order]
-        # This matches the lagr_el0 logic used in SDM
+        # Higher order Lagrange interpolation matching SDM logic but as interpolation
+        # To hit both u[idx] and u[idx+1], we use points u[idx+1], u[idx], u[idx-1], ...
+        # and evaluate relative to the right endpoint t[idx+1].
         
         n = length(sol.u) - 1 # number of intervals
         res = zero(sol.u[1])
         
-        # Local time from the beginning of the interval
-        τ_loc = t_loc - sol.t[idx]
+        # Local time relative to the RIGHT end of the interval
+        θ = t_loc - sol.t[idx+1]
+        # Effective step is negative because we go backwards from idx+1
+        h_eff = -dt
         
         for k in 0:sol.order
             # Using the lagr_el0 from functions_utility.jl
-            # lagr_el0(q, k, τerr, h, t) where t is the variable
-            # In SDM: x(t) = sum_{k=0}^q x_{i-k} * L_k(t)
-            
-            L = lagr_el0(sol.order, k, 0.0, dt, τ_loc)
+            # lagr_el0(q, k, τerr, h, t)
+            # Here point k=0 is u[idx+1] at θ=0, k=1 is u[idx] at θ=-dt, etc.
+            L = lagr_el0(sol.order, k, 0.0, h_eff, θ)
             
             # Use mod1 for periodic indexing of u (1 to n)
-            # x(0) is at u[1] and u[n+1].
-            u_idx = mod1(idx - k, n)
+            u_idx = mod1(idx + 1 - k, n)
             res += sol.u[u_idx] * L
         end
         return res

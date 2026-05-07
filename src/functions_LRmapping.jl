@@ -109,7 +109,6 @@ function DiscreteMappingSteps_LR(rst::AbstractResult{d}) where {d}
         pos = (target_block - 1) * d
         mappingVs[1][(1+pos):(d+pos)] .+= subV.V
     end
-
     ([rst.ts[1], rst.ts[end]], PHILL, PHIRR, mappingVs)
 end
 

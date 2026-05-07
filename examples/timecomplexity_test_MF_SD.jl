@@ -1,13 +1,10 @@
-######Product-Free full mapping
-######The mapping is repsented by a left and a right matrix
+###### Multiplication-Free Semi-Discretization Method for Time-Periodic Delayed Systems
+###### The mapping is repsented by a left and a right matrix
 ## Time-complexity measurements for a publication
-
-5 + 5
-###import Pkg
-########
-###Pkg.activate("")
-######### Pkg.activate()# ez az eredeti, mindent tartalamzo
-#########] dev SemiDiscretizationMethod
+# this code generates the figures in the 
+#   Bachrathy. D
+#   Linear Time Complexity Analysis of Time-Periodic Delayed Systems with Multiplication Free Semi-Discretization Method
+#   Journal of Vibration and Control,2026 
 
 using Revise
 using SemiDiscretizationMethod
@@ -45,7 +42,7 @@ Ndisc = 200
 # T = 20π #Principle period of the system (sin(t)=cos(t+T)) 
 T = 2π #Principle period of the system (sin(t)=cos(t+T)) 
 mathieu_lddep = createMathieuProblem(3.0, 3.0, -0.5, 0.2, T=T) # LDDE problem for Hayes equation
-method = SemiDiscretization(5, T / Ndisc) # 3rd order semi discretization with Δt=0.1
+method = SemiDiscretization(5, T / Ndisc) # 5th order semi discretization with Δt=T/Ndisc
 Nsteps = Int((T + 100eps(T)) ÷ method.Δt)
 
 #mappingLR = DiscreteMapping_LR(mathieu_lddep, method, τmax, n_steps=Nsteps, calculate_additive=true)#The discrete mapping of the system
@@ -74,7 +71,8 @@ tt = []
 muerror = []
 kpowv = -15:0.25:0
 for kpow in kpowv
-    tloc = @elapsed μLR = spectralRadiusOfMapping(mapping, nev=1, tol=10.0^kpow)
+    tloc = @elapsed μ = spectralRadiusOfMapping(mapping, nev=1, tol=10.0^kpow)
+    tloc = @elapsed μLR = spectralRadiusOfMapping(mappingLR, nev=1, tol=10.0^kpow)
     push!(tt, tloc)
     push!(muerror, μ - μLR)
     println(μ - μLR)
@@ -117,15 +115,13 @@ Twaitfor_SH = 10.0;
 BenchmarkTools.DEFAULT_PARAMETERS.samples = 50.0
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 0.1
 
-@warn " Fast test, remove this line!!!!"
-BenchmarkTools.DEFAULT_PARAMETERS.samples = 1.0
-BenchmarkTools.DEFAULT_PARAMETERS.seconds = 0.01
-
-Nv = ceil.(10 .^ (1.0:0.025:3.00))
-
-@warn " Fast test, remove this line!!!!"
-Nv = ceil.(10 .^ (1.6:0.25:3.00))
-Twaitfor_SH = 1.0;
+# @warn " Fast test, remove this line!!!!"
+# BenchmarkTools.DEFAULT_PARAMETERS.samples = 1.0
+# BenchmarkTools.DEFAULT_PARAMETERS.seconds = 0.01
+# 
+# @warn " Fast test, remove this line!!!!"
+# Nv = ceil.(10 .^ (1.6:0.25:3.00))
+# Twaitfor_SH = 1.0;
 
 kpow = 1e-4
 NEV = 1
@@ -309,26 +305,26 @@ for kNdisc in vcat([1, 1], 1:length(Nv)) #the first is repated to get read of th
     println("norm of the difference of the fixed points: ")
     @show norm(μSH[kNdisc] - μLR[kNdisc])
 
-    #if (kNdisc>5000  ||  mod(kNdisc,10)==0)
-    df = DataFrame(
-        Nv_data=Nv,
-        tmake_SH_data=tmake_SH_PhiALL,
-        teig_SH_data=teig_SH,
-        tfixP_SH_data=tfixP_SH,
-        tmake_LR_data=tmake_LR,
-        teig_LR_data=teig_LR,
-        tfixP_LR_data=tfixP_LR,
-        Nv_data_log=f1.(Nv),
-        tmake_SH_data_log=f1.(tmake_SH_PhiALL),
-        teig_SH_data_log=f1.(teig_SH),
-        tfixP_SH_data_log=f1.(tfixP_SH),
-        tmake_LR_data_log=f1.(tmake_LR),
-        teig_LR_data_log=f1.(teig_LR),
-        tfixP_LR_data_log=f1.(tfixP_LR))
-
-    CSV.write("CPU_Timev__T_" * string(T) * "_tau_" * string(τmax) * ".csv", df)
-    println("data saved")
-    #end
+   #  #if (kNdisc>5000  ||  mod(kNdisc,10)==0)
+   #  df = DataFrame(
+   #      Nv_data=Nv,
+   #      tmake_SH_data=tmake_SH_PhiALL,
+   #      teig_SH_data=teig_SH,
+   #      tfixP_SH_data=tfixP_SH,
+   #      tmake_LR_data=tmake_LR,
+   #      teig_LR_data=teig_LR,
+   #      tfixP_LR_data=tfixP_LR,
+   #      Nv_data_log=f1.(Nv),
+   #      tmake_SH_data_log=f1.(tmake_SH_PhiALL),
+   #      teig_SH_data_log=f1.(teig_SH),
+   #      tfixP_SH_data_log=f1.(tfixP_SH),
+   #      tmake_LR_data_log=f1.(tmake_LR),
+   #      teig_LR_data_log=f1.(teig_LR),
+   #      tfixP_LR_data_log=f1.(tfixP_LR))
+# 
+   #  CSV.write("CPU_Timev__T_" * string(T) * "_tau_" * string(τmax) * ".csv", df)
+   #  println("data saved")
+   #  #end
 
 
 
@@ -503,4 +499,4 @@ display(
 )
 
 
-savefig("myplot_final32STD05_T20pi_2__eigs_test.svg")
+#savefig("myplot_final32STD05_T20pi_2__eigs_test.svg")

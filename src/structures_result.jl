@@ -41,7 +41,7 @@ calculate_Aavgs(A::ProportionalMX{d,<:mT}, ts::AbstractVector{<:Real},Δt::Real)
 function Result(LDDEP::LDDEProblem{d,AT,BT, cT}, method::DiscretizationMethod{fT}, DiscretizationLength::Real; n_steps::Int64=nStepOfLength(DiscretizationLength, method.Δt), calculate_additive::Bool=false) where {d,AT,BT,cT,fT}
     # DiscretizationLength discretisated time interval length
     # n_steps: how many mapping matrix to calculate
-    ts =  collect(fT,take(n_steps + 1, iterated(x -> method.Δt + x, zero(method.Δt))))
+    ts = collect(range(zero(fT), length=n_steps + 1, step=method.Δt))
     n = (rOfDelay(DiscretizationLength, method) + 1) * d
     A_avgs = calculate_Aavgs(LDDEP.A, ts, method.Δt)
     subMXs = [Vector{SubMX{eltype(A_avgs)}}(undef, n_steps) for i in 1:(length(LDDEP.Bs) + 1)] # []

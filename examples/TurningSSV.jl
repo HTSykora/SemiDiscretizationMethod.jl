@@ -22,7 +22,7 @@ kw=0.2
 ζ=0.1
 Ω=0.3
 ASSV=0.1
-NT=10 
+NT=10 # number of revolution for one period of the spindle speed variation (T)
 T=2π / Ω * NT  #spindle speed variation in integer number of revolution (NT)
 
 τmax=2π/Ω *(1+ ASSV) # the largest τ of the system
@@ -36,6 +36,7 @@ method=SemiDiscretization(1,0.1) # 1st order semi discretization with Δt=0.05
 
 #----------------------------------------------------------------------------------------------
 #--------------------#updated Left\Right mapping matrices of SemiDiscretization----------------
+#---------------------Multiplactaion Free SemiDiscretization (MF-SD)----------------------
 #----------------------- Order of magnitude faster computation if T<=τmax----------------------
 #----------------------------------------------------------------------------------------------
 @time mappingLR=DiscreteMapping_LR(turningSSV_lddep,method,τmax,
@@ -44,7 +45,10 @@ method=SemiDiscretization(1,0.1) # 1st order semi discretization with Δt=0.05
 @time spectralRadiusOfMapping(mappingLR); # spectral radius ρ of the mapping matrix (ρ>1 unstable, ρ<1 stable)
 @time fixPointOfMapping(mappingLR); # stationary solution of the system (equilibrium position)
 
-
+#Plotting one segment based on the Plot recipe for the PeriodicSolution structure
+sol_periodic = get_periodic_solution(mapping_LR,2)# the dimension of the system must be provided
+fig=plot( sol_periodic, vars=1, label="MF-SD Periodic (order 1)", linewidth=2)
+display(fig)
 
 #--------------------------------------------------------------------------------
 #-----------------traditional mapping of SemiDiscretization----------------------

@@ -7,9 +7,7 @@ using Reexport
 @reexport using Arpack
 
 using ForwardDiff
-using KrylovKit
 using QuadGK
-using Lazy: iterated, take
 
 include("structures_method.jl")
 include("structures_input.jl")

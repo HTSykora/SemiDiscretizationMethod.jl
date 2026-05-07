@@ -3,7 +3,6 @@
 
 using SemiDiscretizationMethod
 using DifferentialEquations # Added for long-time DDE simulation
-using ForwardDiff
 using StaticArrays
 using LinearAlgebra
 using Plots
@@ -42,7 +41,7 @@ println("Automatically extracting system matrices using ForwardDiff...")
 mathieu_lddep = extract_SDM_system(mathieu_dde_rhs, params, Val(2); t_test=0.0)
 
 # Discretization method
-method = SemiDiscretization(2, 0.05) # 2nd order discretization, Δt=0.05
+method = SemiDiscretization(1, 0.05) # 2nd order discretization, Δt=0.05
 n_steps_calc = Int((T_per + 100eps(T_per)) ÷ method.Δt)
 
 # Calculate the mappings
@@ -57,8 +56,8 @@ println("\nChecking the spectral radius (Stability):")
 @time fp_LR = fixPointOfMapping(mapping_LR);# just a point series representing the full priodic solution
 
 
-
 #Plotting one segment based on the Plot recipe for the PeriodicSolution structure
-plot( sol_periodic, vars=1, label="SDM Periodic (order 1)", linewidth=2)
+sol_periodic = get_periodic_solution(mapping_LR,2)# the dimension of the system must be provided
+fig=plot( sol_periodic, vars=1, label="SDM Periodic (order 1)", linewidth=2)
+display(fig)
 
-display(p4)
