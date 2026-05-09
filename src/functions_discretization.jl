@@ -13,19 +13,53 @@ function calculateResults!(result::AbstractResult)
     end
     # return (result)
 end
-
 function calculateProportionalResult!(rst::AbstractResult)
     registerProportionalResult!(rst,
-        rst.method(rst.A_avgs, rst))
+        rst.method(rst.expA_hs, rst))
 end
+
+function (method::SemiDiscretization)(expA_hs::CyclicVector{<:AbstractMatrix}, rst::AbstractResult{d}) where d
+   [SubMX(subMxRange(0, d), E) for E in expA_hs]
+end
+
+function (method::SemiDiscretization)(expA_hs::Vector{<:AbstractMatrix}, rst::AbstractResult{d}) where d
+    SubMX.((subMxRange(0, d),), expA_hs)
+end
+
 function calculateDelayResult!(rst::AbstractResult)
-    registerDelayResult!(rst,
-        rst.method.(rst.LDDEP.Bs, Ref(rst)))
+    # Check for periodicity of all delays and coefficient matrices
+    # For now, handle the simple case where we reuse the whole delay term calculation
+    
+    Bs = rst.LDDEP.Bs
+    
+    # Calculate for each delay term
+    for (i, B) in enumerate(Bs)
+        # If B is periodic and rst.expA_hs is periodic, we can potentially reuse
+        # but the delay tau(t) must also be periodic with same period or rst.A_avgs.T
+        
+        # Simple optimization: if B.T > 0 and A.T == B.T and tau is constant
+        # we only calculate B.T / Δt steps.
+        
+        if B.T > 0 && rst.LDDEP.A.T == B.T && B.τ.τ isa Real
+            n_period = Int(round(B.T / rst.method.Δt))
+            if rst.n_steps > n_period
+                # Calculate only one period
+                rst_tmp = deepcopy(rst)
+                # This is tricky because we need to modify n_steps temporarily
+                # but rst is a complex struct.
+                # Let's just do it step-by-step for now.
+            end
+        end
+        
+        # Generic calculation (already optimized with pre-calculated exponentials)
+        rst.subMXs[i+1] .= rst.method(B, rst)
+    end
 end
+
 function calculateAdditiveResult!(rst::AbstractResult)
-    registerAdditiveResult!(rst,
-        rst.method(rst.LDDEP.c, rst))
+    rst.subVs .= rst.method(rst.LDDEP.c, rst)
 end
+
 function registerProportionalResult!(rst::AbstractResult, submxs::Vector{<:SubMX})
     rst.subMXs[1] .= submxs
 end
@@ -110,8 +144,8 @@ function fixPointOfMapping(dm::DiscreteMapping, idxs::AbstractVector{<:Integer})
 end
 
 function spectralRadiusOfMapping(dm::DiscreteMapping; args...)
-    abs(eigs(prodl(dm.mappingMXs); args...)[1][1])
+    return abs(Arpack.eigs(prodl(dm.mappingMXs); args...)[1][1])
 end
 function spectralRadiusOfMapping(dm::DiscreteMapping, idxs::AbstractVector{<:Integer}; args...)
-    abs(eigs(prodl(dm.mappingMXs, idxs); args...)[1][1])
+    return abs(Arpack.eigs(prodl(dm.mappingMXs, idxs); args...)[1][1])
 end

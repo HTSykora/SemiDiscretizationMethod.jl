@@ -6,7 +6,7 @@ using DifferentialEquations # Added for long-time DDE simulation
 using StaticArrays
 using LinearAlgebra
 using Plots
-plotlyjs()
+ #plotlyjs()
 using LaTeXStrings
 
 # =======================================================================

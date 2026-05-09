@@ -8,6 +8,7 @@ using Reexport
 
 using ForwardDiff
 using QuadGK
+using KrylovKit
 
 include("structures_method.jl")
 include("structures_input.jl")

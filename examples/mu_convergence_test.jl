@@ -1,13 +1,7 @@
 # mu_convergence_test
 ###### Multiplication-Free Semi-Discretization Method for Time-Periodic Delayed Systems
 ###### The mapping is repsented by a left and a right matrix
-5 + 5
 
-###import Pkg
-########
-###Pkg.activate("")
-######### Pkg.activate()# ez az eredeti, mindent tartalamzo
-#########] dev SemiDiscretizationMethod
 
 using SemiDiscretizationMethod
 using StaticArrays

@@ -63,8 +63,8 @@ axis = [Axis(-1.0:0.5:5.0, :δ),
     Axis(-2.0
          :0.5:1.5, :b0)]
 
-iteration = 4;
-@time stab_border_points = getinterpolatedsolution(MDBM.solve!(MDBM_Problem(foo, axis), iteration, doThreadprecomp=false));#internal ARPACK eigen solver is used, which generate confilts with the multithreading of mdbm, so doThreadprecomp is set to false to avoid that.
+iteration = 5;
+@time stab_border_points = getinterpolatedsolution(MDBM.solve!(MDBM_Problem(foo, axis), iteration));#internal ARPACK eigen solver is used, which generate confilts with the multithreading of mdbm, so doThreadprecomp is set to false to avoid that.
 
 scatter(stab_border_points...,
     label="", title="Stability border of the delay Mathieu equation", xlabel=L"\delta", ylabel=L"b_0",
@@ -87,7 +87,7 @@ axis = [Axis(-2:1:5.0, :δ),
     Axis(-0.01:1:5, :ε)]
 
 iteration = 5;
-@time stab_border_points = getinterpolatedsolution(MDBM.solve!(MDBM_Problem(foo, axis), iteration, doThreadprecomp=false));#internal ARPACK eigen solver is used, which generate confilts with the multithreading of mdbm, so doThreadprecomp is set to false to avoid that.
+@time stab_border_points = getinterpolatedsolution(MDBM.solve!(MDBM_Problem(foo, axis), iteration));#internal ARPACK eigen solver is used, which generate confilts with the multithreading of mdbm, so doThreadprecomp is set to false to avoid that.
 
 scatter(stab_border_points...,
     label="", title="Stability border of the delay Mathieu equation", xlabel=L"\delta", ylabel=L"\epsilon",
@@ -100,7 +100,7 @@ using MDBM
 a1 = 0.01;
 τmax = 2π;
 T = 2π;
-method = SemiDiscretization(2, T / 40);
+method = SemiDiscretization(2, T / 40)
 
 foo(δ, b0, ε) = log(spectralRadiusOfMapping(DiscreteMapping_LR(createMathieuProblem(δ, ε, b0, a1, T=T), method, τmax,
         n_steps=Int((T + 100eps(T)) ÷ method.Δt)), nev=1, tol=1e-4))::Float64; # No additive term calculated
@@ -110,7 +110,7 @@ axis = [Axis(-2:0.5:5.0, :δ),
     Axis(-0.01:0.5:5, :ε)]
 
 iteration = 2;
-@time stab_border_points = getinterpolatedsolution(MDBM.solve!(MDBM_Problem(foo, axis), iteration, doThreadprecomp=false));
+@time stab_border_points = getinterpolatedsolution(MDBM.solve!(MDBM_Problem(foo, axis), iteration));
 
 scatter(stab_border_points...,
     label="", title="Stability border of the delay Mathieu equation", xlabel=L"\delta", ylabel=L"b_0", zlabel=L"\epsilon",

@@ -1,8 +1,9 @@
-struct DiscreteMapping_LR{tT,mxT,vT}
+struct DiscreteMapping_LR{tT,mxT,vT,sysT}
     ts::Vector{tT}
     LmappingMX::mxT
     RmappingMX::mxT
     mappingVs::Vector{vT}
+    A_fixpoint::sysT # Pre-assembled (L - R) matrix for fast fixed point solve
 end
 
 ###############################################################################
@@ -31,178 +32,151 @@ end
 
 function DiscreteMappingSteps_LR(rst::AbstractResult{d}) where {d}
     rangeshift_LR!(rst)
-    i = zeros(Int, 0)
-    j = zeros(Int, 0)
-    v = zeros(typeof(rst.subMXs[1][1].MXs[1][1]), 0)
-
-
-    Nelements_approx = ((methodorder(rst.method) + 1) * (size(rst.subMXs, 1) - 1) + 1) * rst.n_steps * d * d+ rst.n_steps * d 
-  # println(Nelements_approx)
-    sizehint!(i, Nelements_approx)
-    sizehint!(j, Nelements_approx)
-    sizehint!(v, Nelements_approx)
-
-    for (iIPR, smx_IPR) in enumerate(rst.subMXs)#P,R1,R2....
-        for (it, smx) in enumerate(smx_IPR) #each time
-            for iloc in eachindex(smx.ranges, smx.MXs)
-
-                #println("----")
-                #println([iloc, it, iIPR])
-                push!(i, collect(smx.ranges[iloc][1]) .* ones(Int, 1, d)...)
-                push!(j, ones(Int, d, 1) .* transpose(collect(smx.ranges[iloc][2]))...)
-                #push!(j, collect(smx.ranges[iloc][2]) .* ones(Int, 1, d)...)
-                push!(v, -smx.MXs[iloc]...)
-                #i[:,:,iloc,it,iIPR] .= getindex.(collect(eachindex(IndexCartesian(),smloc)),1)
-                #j[:,:,iloc,it,iIPR] .= getindex.(collect(eachindex(IndexCartesian(),smloc)),2)
-                #v[:,:,iloc,it,iIPR] .= smloc
+    
+    p = rst.n_steps
+    r = rst.n ÷ d
+    rhat = maximum([r, p - 1])
+    n_full = (rhat + 1) * d
+    
+    # Pre-calculate counts for L and R parts
+    nelements_L_core = 0
+    nelements_R_core = 0
+    for smx_IPR in rst.subMXs
+        for smx in smx_IPR
+            for range_pair in smx.ranges
+                cols = range_pair[2]
+                if cols[end] <= p * d
+                    nelements_L_core += d * d
+                else
+                    for col_idx in cols
+                        if col_idx <= p * d
+                            nelements_L_core += d
+                        else
+                            nelements_R_core += d
+                        end
+                    end
+                end
             end
         end
     end
-   # println(size(i))
-    push!(i, (1:rst.n_steps*d)...)
-    push!(j, (1:rst.n_steps*d)...)
-    push!(v, 1.0 .* ones(rst.n_steps * d, 1)...)
-    #    sparse(i, j, v,[ m, n, combine])
 
-   # println(size(i)) 
-   # println("--------")
-    r = rst.n ÷ d
-    p = rst.n_steps
-    rhat = maximum([r, p - 1])
-    #rhat = maximum([r, p - 1])+10
-    #rhat = maximum([maximum(j), p - 1])
-    #@show (maximum(i), maximum(j), p , (rhat + p + 1) )
-    #@show (maximum(i), maximum(j), p *d, (rhat + p + 1)*d )
-    #@show i
-    #@show j
-    PHI = sparse(i, j, v, p * d, (rhat + p + 1) * d)
-    dropzeros!(PHI)
+    n_extra = (rhat + 1 - p) * d
+    
+    # Coordinates for L
+    iL = Vector{Int}(undef, nelements_L_core + p * d + n_extra)
+    jL = Vector{Int}(undef, nelements_L_core + p * d + n_extra)
+    vL = Vector{typeof(rst.subMXs[1][1].MXs[1][1])}(undef, nelements_L_core + p * d + n_extra)
+    
+    # Coordinates for R
+    iR = Vector{Int}(undef, nelements_R_core + n_extra)
+    jR = Vector{Int}(undef, nelements_R_core + n_extra)
+    vR = Vector{typeof(rst.subMXs[1][1].MXs[1][1])}(undef, nelements_R_core + n_extra)
+    
+    # Coordinates for A = L - R
+    iA = Vector{Int}(undef, length(iL) + length(iR))
+    jA = Vector{Int}(undef, length(jL) + length(jR))
+    vA = Vector{typeof(rst.subMXs[1][1].MXs[1][1])}(undef, length(vL) + length(vR))
 
-    #PHIL = -PHI[1:(rhat+1)*d, 1:(rhat+1)*d]
-    #PHIR = PHI[1:(rhat+1)*d, (rhat+1)*d+1:end]
-
-    #Note: sign is changed according to the Journal Publication
-    PHIL = PHI[1:(p)*d, 1:(p)*d]
-    PHIR = -PHI[1:(p)*d, (p)*d+1:end]
-
-    PHILL = vcat(
-        hcat(PHIL, spzeros((p) * d, (rhat + 1 - p) * d)),
-        hcat(spzeros((rhat + 1 - p) * d, (p) * d), spdiagm(0 => ones((rhat + 1 - p) * d)))
-    )
-    PHIRR = vcat(
-        PHIR,
-        hcat(spdiagm(0 => ones((rhat + 1 - p) * d)), spzeros((rhat + 1 - p) * d, (p) * d))
-    )
-    # Wrong order of the blocks!
-    # mappingVs = [spzeros(size(PHILL, 1))]
-    # for (it, subV) in enumerate(rst.subVs)
-    #     # pos=(it-1)*d
-    #     # mappingVs[1][(1+pos) : (d+pos)] .+= subV.V
-    #     mappingVs[1][(1+(it-1)*d):(d+(it-1)*d)] .+= subV.V
-    # end
-
-    # Direction of the excitation vector is reversed accordingly
-    mappingVs = [spzeros(size(PHILL, 1))]
-    p_steps = rst.n_steps
-    for (it, subV) in enumerate(rst.subVs)
-        target_block = p_steps - it + 1
-        pos = (target_block - 1) * d
-        mappingVs[1][(1+pos):(d+pos)] .+= subV.V
+    currL = 1
+    currR = 1
+    currA = 1
+    for smx_IPR in rst.subMXs
+        for smx in smx_IPR
+            for (range_pair, mx) in zip(smx.ranges, smx.MXs)
+                rows = range_pair[1]
+                cols = range_pair[2]
+                for (c_idx, col_idx) in enumerate(cols)
+                    if col_idx <= p * d
+                        # Unroll for d=2 if possible
+                        if d == 2
+                            # row 1
+                            val1 = -mx[1, c_idx]
+                            row1 = rows[1]
+                            iL[currL] = row1; jL[currL] = col_idx; vL[currL] = val1; currL += 1
+                            iA[currA] = row1; jA[currA] = col_idx; vA[currA] = val1; currA += 1
+                            # row 2
+                            val2 = -mx[2, c_idx]
+                            row2 = rows[2]
+                            iL[currL] = row2; jL[currL] = col_idx; vL[currL] = val2; currL += 1
+                            iA[currA] = row2; jA[currA] = col_idx; vA[currA] = val2; currA += 1
+                        else
+                            for r_idx in 1:d
+                                val = -mx[r_idx, c_idx]
+                                row = rows[r_idx]
+                                iL[currL] = row; jL[currL] = col_idx; vL[currL] = val; currL += 1
+                                iA[currA] = row; jA[currA] = col_idx; vA[currA] = val; currA += 1
+                            end
+                        end
+                    else
+                        col = col_idx - p * d
+                        if d == 2
+                            # row 1
+                            val1 = mx[1, c_idx]
+                            row1 = rows[1]
+                            iR[currR] = row1; jR[currR] = col; vR[currR] = val1; currR += 1
+                            iA[currA] = row1; jA[currA] = col; vA[currA] = -val1; currA += 1
+                            # row 2
+                            val2 = mx[2, c_idx]
+                            row2 = rows[2]
+                            iR[currR] = row2; jR[currR] = col; vR[currR] = val2; currR += 1
+                            iA[currA] = row2; jA[currA] = col; vA[currA] = -val2; currA += 1
+                        else
+                            for r_idx in 1:d
+                                val = mx[r_idx, c_idx]
+                                row = rows[r_idx]
+                                iR[currR] = row; jR[currR] = col; vR[currR] = val; currR += 1
+                                iA[currA] = row; jA[currA] = col; vA[currA] = -val; currA += 1
+                            end
+                        end
+                    end
+                end
+            end
+        end
     end
-    ([rst.ts[1], rst.ts[end]], PHILL, PHIRR, mappingVs)
+
+    # PHIL diagonal identity
+    for k in 1:(p * d)
+        iL[currL] = k; jL[currL] = k; vL[currL] = 1.0; currL += 1
+        iA[currA] = k; jA[currA] = k; vA[currA] = 1.0; currA += 1
+    end
+    
+    # Extra parts for PHILL and PHIRR
+    for k in 1:n_extra
+        idx = p * d + k
+        iL[currL] = idx; jL[currL] = idx; vL[currL] = 1.0; currL += 1
+        iA[currA] = idx; jA[currA] = idx; vA[currA] = 1.0; currA += 1
+    end
+    
+    for k in 1:n_extra
+        row = p * d + k
+        col = k
+        iR[currR] = row; jR[currR] = col; vR[currR] = 1.0; currR += 1
+        iA[currA] = row; jA[currA] = col; vA[currA] = -1.0; currA += 1
+    end
+
+    PHILL = sparse(iL, jL, vL, n_full, n_full)
+    PHIRR = sparse(iR, jR, vR, n_full, n_full)
+    A_fix = sparse(iA, jA, vA, n_full, n_full)
+    
+    mappingV = zeros(eltype(vL), n_full)
+    for (it, subV) in enumerate(rst.subVs)
+        target_block = p - it + 1
+        pos = (target_block - 1) * d
+        mappingV[(1+pos):(d+pos)] .+= subV.V
+    end
+    mappingVs = [mappingV]
+    
+    ([rst.ts[1], rst.ts[end]], PHILL, PHIRR, mappingVs, A_fix)
 end
 
-function spectralRadiusOfMapping(mappLR::DiscreteMapping_LR{tT,mxT,vT}; args...)::mxT.parameters[1] where {tT,mxT,vT}
-    return abs(eigs(mappLR.RmappingMX, mappLR.LmappingMX; args...)[1][1])::mxT.parameters[1]
+function spectralRadiusOfMapping(mappLR::DiscreteMapping_LR{tT,mxT,vT}; nev=1, tol=1e-6, args...)::mxT.parameters[1] where {tT,mxT,vT}
+    # Use KrylovKit on the operator L \ (R * x) to find the largest magnitude eigenvalue
+    # This works for non-symmetric matrices and avoids geneigsolve's symmetric requirement
+    vals, vecs, info = eigsolve(x -> mappLR.LmappingMX \ (mappLR.RmappingMX * x), rand(eltype(mappLR.RmappingMX), size(mappLR.RmappingMX, 1)), nev, :LM; tol=tol, args...)
+    return abs(vals[1])::mxT.parameters[1]
 end
 
 function fixPointOfMapping(mappLR::DiscreteMapping_LR{tT,mxT,vT}) where {tT,mxT,vT}
-    (mappLR.LmappingMX - mappLR.RmappingMX) \ Vector(mappLR.mappingVs[1])
+    # Use the pre-assembled system matrix for fix point solve
+    return mappLR.A_fixpoint \ mappLR.mappingVs[1]
 end
-
-
-
-"""
-    extract_SDM_system(dde_rhs, p, ::Val{N}; t_test = 0.0) where {N}
-
-Automatically extracts the necessary matrices and additive term for 
-SemiDiscretizationMethod.jl from a black-box DDE "right-hand-side" function.
-This is an experimetal tool, only for finite number of delays (definitly different at all times).
-It migh fail for complex systems.
-"""
-function extract_SDM_system(dde_rhs, p, ::Val{N}; t_test = 0.0) where {N}
-    
-    u_eq = @SVector zeros(Float64, N)
-    
-    # --- Step 1: Detect delays using a "Spy function" ---
-    requested_times = Float64[]
-    h_spy(p_arg, t_req; kwargs...) = begin
-        push!(requested_times, t_req)
-        return u_eq
-    end
-    
-    # Run at the test time to catch the requested past times
-    dde_rhs(u_eq, h_spy, p, t_test)
-    
-    # Calculate tau values, round them to avoid minor numerical errors, and filter
-    taus = sort(unique(round.(t_test .- requested_times, digits=10)))
-    filter!(tau -> tau > 1e-10, taus) # Filter out tau=0 requests, if any
-    
-    # --- Step 2: Set up ForwardDiff Duals for Jacobian calculation ---
-    # N-dimensional perturbation for gradient/Jacobian extraction
-    partials = ntuple(i -> ForwardDiff.Partials{N, Float64}(ntuple(j -> i==j ? 1.0 : 0.0, N)), N)
-    A_duals = SVector{N}(ntuple(i -> ForwardDiff.Dual{nothing, Float64, N}(0.0, partials[i]), N))
-    
-    u_dual = u_eq .+ A_duals
-    
-    # Helper function to construct SMatrix from the Dual result
-    function get_jac(du_dual)
-        SMatrix{N, N, Float64, N*N}(ntuple(k -> begin
-            i = (k - 1) % N + 1
-            j = (k - 1) ÷ N + 1
-            ForwardDiff.partials(du_dual[i], j)
-        end, N*N))
-    end
-
-    # --- Step 3: Extract A(t) - Present time Jacobian matrix ---
-    A_func = t -> begin
-        # Freeze the past: no dual perturbation in the past
-        h_const(p_arg, t_req; kwargs...) = u_eq 
-        du_out = dde_rhs(u_dual, h_const, p, t)
-        return get_jac(du_out)
-    end
-    AMx = ProportionalMX(A_func)
-
-    # --- Step 4: Extract B_i(t) - Delayed Jacobian matrices ---
-    # Fix: Strongly typed array for DelayMX to avoid MethodError in LDDEProblem
-    delay_matrices = DelayMX{N}[]
-    for tau in taus
-        B_func = t -> begin
-            # The past receives a perturbed (Dual) value only at the specific tau time
-            h_tau(p_arg, t_req; kwargs...) = begin
-                if isapprox(t - t_req, tau, atol=1e-8)
-                    return u_dual
-                else
-                    return u_eq
-                end
-            end
-            du_out = dde_rhs(u_eq, h_tau, p, t)
-            return get_jac(du_out)
-        end
-        # Create the DelayMX object for the given delay
-        push!(delay_matrices, DelayMX(t -> tau, B_func))
-    end
-
-    # --- Step 5: Extract c(t) - Additive term ---
-    c_func = t -> begin
-        # Since u_eq = 0, evaluating the rhs alone yields the additive c(t) term
-        h_zero(p_arg, t_req; kwargs...) = u_eq
-        du_out = dde_rhs(u_eq, h_zero, p, t)
-        return SVector{N, Float64}(ForwardDiff.value.(du_out))
-    end
-    cVec = Additive(c_func)
-
-    # Return the constructed system
-    return LDDEProblem(AMx, delay_matrices, cVec)
-end
-

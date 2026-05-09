@@ -75,8 +75,8 @@ function run_complexity_test(; Nv=ceil.(10 .^ (1.0:0.1:4.0)), Twaitfor_SH=2.0)
     kpow = 1e-4 # tolerance for eigs
 
     # Set benchmark parameters
-    BenchmarkTools.DEFAULT_PARAMETERS.samples = 10
-    BenchmarkTools.DEFAULT_PARAMETERS.seconds = 0.1
+    BenchmarkTools.DEFAULT_PARAMETERS.samples = 20
+    BenchmarkTools.DEFAULT_PARAMETERS.seconds = 1.5
 
     τmax = 2π
     T = 2π
@@ -139,9 +139,9 @@ function run_complexity_test(; Nv=ceil.(10 .^ (1.0:0.1:4.0)), Twaitfor_SH=2.0)
             end
         end
         p = plot_results((Nv=Nv, tmake_SH=tmake_SH_PhiALL, teig_SH=teig_SH, fixSH=fixSH,
-        tmake_LR=tmake_LR, teig_LR=teig_LR, fixLR=fixLR,
-        tmake_SH_S=tmake_SH_PhiALL_S, teig_SH_S=teig_SH_S, fixSH_S=fixSH_S,
-        tmake_LR_S=tmake_LR_S, teig_LR_S=teig_LR_S, fixLR_S=fixLR_S))
+            tmake_LR=tmake_LR, teig_LR=teig_LR, fixLR=fixLR,
+            tmake_SH_S=tmake_SH_PhiALL_S, teig_SH_S=teig_SH_S, fixSH_S=fixSH_S,
+            tmake_LR_S=tmake_LR_S, teig_LR_S=teig_LR_S, fixLR_S=fixLR_S))
         display(p)
     end
 
@@ -159,14 +159,22 @@ function plot_results(results)
 
     p = plot(xaxis=:log10, yaxis=:log10, gridlinewidth=2, legend=:bottomright)
 
+    # # Plot data with ribbons
+    # plot!(p, Nv, results.tmake_SH, ribbon=results.tmake_SH_S .* ScaleSTD, label="Traditional: Mapping Creation (prodl)")
+    # plot!(p, Nv, results.teig_SH, ribbon=results.teig_SH_S .* ScaleSTD, label="Traditional: eigs(Φ)")
+    # plot!(p, Nv, results.fixSH, ribbon=results.fixSH_S .* ScaleSTD, label="Traditional: fixPoint")
+    #
+    # plot!(p, Nv, results.tmake_LR, ribbon=results.tmake_LR_S .* ScaleSTD, label="MFSD (LR): Mapping Creation", linewidth=2)
+    # plot!(p, Nv, results.teig_LR, ribbon=results.teig_LR_S .* ScaleSTD, label="MFSD (LR): eigs(ΦR, ΦL)", linewidth=2)
+    # plot!(p, Nv, results.fixLR, ribbon=results.fixLR_S .* ScaleSTD, label="MFSD (LR): fixPoint", linewidth=2)
     # Plot data with ribbons
-    plot!(p, Nv, results.tmake_SH, ribbon=results.tmake_SH_S .* ScaleSTD, label="Traditional: Mapping Creation (prodl)")
-    plot!(p, Nv, results.teig_SH, ribbon=results.teig_SH_S .* ScaleSTD, label="Traditional: eigs(Φ)")
-    plot!(p, Nv, results.fixSH, ribbon=results.fixSH_S .* ScaleSTD, label="Traditional: fixPoint")
+    plot!(p, Nv, results.tmake_SH, label="Traditional: Mapping Creation (prodl)")
+    plot!(p, Nv, results.teig_SH, label="Traditional: eigs(Φ)")
+    plot!(p, Nv, results.fixSH, label="Traditional: fixPoint")
 
-    plot!(p, Nv, results.tmake_LR, ribbon=results.tmake_LR_S .* ScaleSTD, label="MFSD (LR): Mapping Creation", linewidth=2)
-    plot!(p, Nv, results.teig_LR, ribbon=results.teig_LR_S .* ScaleSTD, label="MFSD (LR): eigs(ΦR, ΦL)", linewidth=2)
-    plot!(p, Nv, results.fixLR, ribbon=results.fixLR_S .* ScaleSTD, label="MFSD (LR): fixPoint", linewidth=2)
+    plot!(p, Nv, results.tmake_LR, label="MFSD (LR): Mapping Creation", linewidth=2)
+    plot!(p, Nv, results.teig_LR, label="MFSD (LR): eigs(ΦR, ΦL)", linewidth=2)
+    plot!(p, Nv, results.fixLR, label="MFSD (LR): fixPoint", linewidth=2)
 
     # Add power law fits (dashed lines)
     for (y, label) in [(results.tmake_SH, ""), (results.teig_SH, ""), (results.tmake_LR, ""), (results.teig_LR, "")]
@@ -184,7 +192,7 @@ function plot_results(results)
 end
 
 # Main execution
-results = run_complexity_test(Nv=ceil.(10 .^ (1.0:0.25:5.0)), Twaitfor_SH=1.0)
+results = run_complexity_test(Nv=ceil.(10 .^ (1.0:0.2:5.5)), Twaitfor_SH=3.0)
 pfinal = plot_results(results)
 display(pfinal)
 

@@ -7,7 +7,7 @@ using ForwardDiff
 using StaticArrays
 using LinearAlgebra
 using Plots
-plotlyjs()
+#plotlyjs()
 using LaTeXStrings
 
 # =======================================================================
@@ -146,6 +146,4 @@ ylabel!(p4, "x(t)")
 
 #Plotting one segment based on the Plot recipe for the PeriodicSolution structure
 plot!(p4, sol_periodic, vars=1, label="SDM Periodic (order 1)", linewidth=2)
-
-
 display(p4)
