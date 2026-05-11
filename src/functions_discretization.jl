@@ -143,9 +143,22 @@ function fixPointOfMapping(dm::DiscreteMapping, idxs::AbstractVector{<:Integer})
     (I - prodl(dm.mappingMXs,idxs)) \ Vector(reduce_additive(dm.mappingMXs, dm.mappingVs, idxs))
 end
 
-function spectralRadiusOfMapping(dm::DiscreteMapping; args...)
-    return abs(Arpack.eigs(prodl(dm.mappingMXs); args...)[1][1])
+function spectralRadiusOfMapping(dm::DiscreteMapping; useKrylovKit=false, nev=1, tol=1e-6, args...)
+    mx = prodl(dm.mappingMXs)
+    if useKrylovKit
+        vals, vecs, info = eigsolve(mx, rand(eltype(mx), size(mx, 1)), nev, :LM; tol=tol, args...)
+        return abs(vals[1])
+    else
+        return abs(Arpack.eigs(mx; nev=nev, tol=tol, args...)[1][1])
+    end
 end
-function spectralRadiusOfMapping(dm::DiscreteMapping, idxs::AbstractVector{<:Integer}; args...)
-    return abs(Arpack.eigs(prodl(dm.mappingMXs, idxs); args...)[1][1])
+
+function spectralRadiusOfMapping(dm::DiscreteMapping, idxs::AbstractVector{<:Integer}; useKrylovKit=false, nev=1, tol=1e-6, args...)
+    mx = prodl(dm.mappingMXs, idxs)
+    if useKrylovKit
+        vals, vecs, info = eigsolve(mx, rand(eltype(mx), size(mx, 1)), nev, :LM; tol=tol, args...)
+        return abs(vals[1])
+    else
+        return abs(Arpack.eigs(mx; nev=nev, tol=tol, args...)[1][1])
+    end
 end

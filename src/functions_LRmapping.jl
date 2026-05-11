@@ -169,11 +169,16 @@ function DiscreteMappingSteps_LR(rst::AbstractResult{d}) where {d}
     ([rst.ts[1], rst.ts[end]], PHILL, PHIRR, mappingVs, A_fix)
 end
 
-function spectralRadiusOfMapping(mappLR::DiscreteMapping_LR{tT,mxT,vT}; nev=1, tol=1e-6, args...)::mxT.parameters[1] where {tT,mxT,vT}
-    # Use KrylovKit on the operator L \ (R * x) to find the largest magnitude eigenvalue
-    # This works for non-symmetric matrices and avoids geneigsolve's symmetric requirement
-    vals, vecs, info = eigsolve(x -> mappLR.LmappingMX \ (mappLR.RmappingMX * x), rand(eltype(mappLR.RmappingMX), size(mappLR.RmappingMX, 1)), nev, :LM; tol=tol, args...)
-    return abs(vals[1])::mxT.parameters[1]
+function spectralRadiusOfMapping(mappLR::DiscreteMapping_LR{tT,mxT,vT}; useKrylovKit=true, nev=1, tol=1e-6, args...)::mxT.parameters[1] where {tT,mxT,vT}
+    if useKrylovKit
+        # Use KrylovKit on the operator L \ (R * x) to find the largest magnitude eigenvalue
+        # This works for non-symmetric matrices and avoids geneigsolve's symmetric requirement
+        vals, vecs, info = eigsolve(x -> mappLR.LmappingMX \ (mappLR.RmappingMX * x), rand(eltype(mappLR.RmappingMX), size(mappLR.RmappingMX, 1)), nev, :LM; tol=tol, args...)
+        return abs(vals[1])::mxT.parameters[1]
+    else
+        # Use Arpack for generalized eigenvalue problem: R*x = lambda*L*x
+        return abs(Arpack.eigs(mappLR.RmappingMX, mappLR.LmappingMX; nev=nev, tol=tol, args...)[1][1])::mxT.parameters[1]
+    end
 end
 
 function fixPointOfMapping(mappLR::DiscreteMapping_LR{tT,mxT,vT}) where {tT,mxT,vT}
