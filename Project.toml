@@ -1,6 +1,6 @@
 name = "SemiDiscretizationMethod"
 uuid = "a6865705-0aff-55fc-a8e1-34d7b6815716"
-version = "0.4.0"
+version = "0.4.1"
 
 [deps]
 Arpack = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
