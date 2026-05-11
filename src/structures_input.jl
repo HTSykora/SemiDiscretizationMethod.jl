@@ -26,10 +26,11 @@ Base.length(cs::T) where T<:CoefficientMatrix{d} where d = d^2
 
 struct ProportionalMX{d,T} <: CoefficientMatrix{d}
     MX::T # matrix
+    T::Float64 # Principle period (0.0 if not periodic)
 end
-ProportionalMX(mx::mxT) where mxT <: Function = ProportionalMX{size(mx(0.), 1),mxT}(mx)
-ProportionalMX(mx::mxT) where mxT <: SMatrix = ProportionalMX{size(mx, 1),mxT}(mx)
-ProportionalMX(mx::mxT) where mxT <: AbstractMatrix{<:Real} = ProportionalMX(SMatrix{size(mx)...}(mx))
+ProportionalMX(mx::mxT; T=0.0) where mxT <: Function = ProportionalMX{size(mx(0.), 1),mxT}(mx, Float64(T))
+ProportionalMX(mx::mxT; T=0.0) where mxT <: SMatrix = ProportionalMX{size(mx, 1),mxT}(mx, Float64(T))
+ProportionalMX(mx::mxT; T=0.0) where mxT <: AbstractMatrix{<:Real} = ProportionalMX(SMatrix{size(mx)...}(mx), T=T)
 (PMX::ProportionalMX{d,<:Function})(t) where d = PMX.MX(t)
 (PMX::ProportionalMX{d,<:AbstractMatrix{<:Real}})(t) where d = PMX.MX
 Base.convert(::Type{ProportionalMX}, mx::mT) where mT <: AbstractMatrix{<:Real} = ProportionalMX(mx)
@@ -37,23 +38,25 @@ Base.convert(::Type{ProportionalMX}, mx::mT) where mT <: AbstractMatrix{<:Real} 
 struct DelayMX{d,dT,bT} <: CoefficientMatrix{d}
     τ::Delay{dT} # delay
     MX::bT # matrix
+    T::Float64 # Principle period (0.0 if not periodic)
 end
 
-DelayMX(τ::RealOrFunction, MX::MatrixOrFunction) = DelayMX(Delay(τ), MX)
-DelayMX(τ::Delay{dT}, MX::mxT) where {dT,mxT<:Function} = DelayMX{size(MX(0.),1),dT,mxT}(τ, MX)
-DelayMX(τ::Delay{dT}, MX::mxT) where {dT,mxT <: SMatrix} = DelayMX{size(MX, 1),dT,mxT}(τ, MX)
+DelayMX(τ::RealOrFunction, MX::MatrixOrFunction; T=0.0) = DelayMX(Delay(τ), MX, T=T)
+DelayMX(τ::Delay{dT}, MX::mxT; T=0.0) where {dT,mxT<:Function} = DelayMX{size(MX(0.),1),dT,mxT}(τ, MX, Float64(T))
+DelayMX(τ::Delay{dT}, MX::mxT; T=0.0) where {dT,mxT <: SMatrix} = DelayMX{size(MX, 1),dT,mxT}(τ, MX, Float64(T))
 
-DelayMX(τ::Delay{dT}, MX::mxT) where {dT,mxT<:AbstractMatrix{<:Real}} = DelayMX(τ,SMatrix{size(MX)...}(MX))
+DelayMX(τ::Delay{dT}, MX::mxT; T=0.0) where {dT,mxT<:AbstractMatrix{<:Real}} = DelayMX(τ,SMatrix{size(MX)...}(MX), T=T)
 (DMX::DelayMX{d,<:dT,<:AbstractMatrix{<:Real}})(t) where {d,dT} = DMX.MX
 (DMX::DelayMX{d,<:dT,<:Function})(t) where {d,dT} = DMX.MX(t)
 
 struct Additive{d,T} <: AdditiveVector{d}
     V::T
+    T::Float64
 end
-Additive(v::vT) where vT <: Function = Additive{length(v(0.)),vT}(v)
-Additive(v::vT) where vT <: SVector{d} where d = Additive{d,vT}(v)
-Additive(v::vT) where vT <: AbstractVector{<:Real} = Additive(SVector(v...))
-Additive(d::Integer) = Additive{d,Vector{Nothing}}(Vector{Nothing}(undef, d))
+Additive(v::vT; T=0.0) where vT <: Function = Additive{length(v(0.)),vT}(v, Float64(T))
+Additive(v::vT; T=0.0) where vT <: SVector{d} where d = Additive{d,vT}(v, Float64(T))
+Additive(v::vT; T=0.0) where vT <: AbstractVector{<:Real} = Additive(SVector(v...), T=T)
+Additive(d::Integer; T=0.0) = Additive{d,Vector{Nothing}}(Vector{Nothing}(undef, d), Float64(T))
 (AV::Additive{d,<:AbstractVector{<:Real}})(t) where d = AV.V
 (AV::Additive{d,<:Function})(t) where d = AV.V(t)
 (AV::Additive{d,<:Array{<:Nothing}})(t) where d = zeros(d) # TODO check the effect on performance
@@ -72,4 +75,3 @@ _problemsize(::LDDEProblem{d,AT,BT,cT}) where {d,AT,BT,cT} = d # size of the sta
 
 LDDEProblem(A::AT, Bs::Vector{<:BT}, c::cT = Additive(size(A, 2))) where {AT <: ProportionalMX,BT <: DelayMX,cT <: Additive} = LDDEProblem{size(A, 2),AT,BT,cT}(A, Bs, c)
 LDDEProblem(A::AT, B::BT, c::cT = Additive(size(A, 2))) where {AT <: ProportionalMX,BT <: DelayMX,cT <: Additive} = LDDEProblem{size(A, 2),AT,BT,cT}(A, [B], c)
-

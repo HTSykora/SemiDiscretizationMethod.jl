@@ -1,6 +1,4 @@
 
-
-
 using SemiDiscretizationMethod
 
 function createMathieuProblem(δ, ε, b0, a1; T=2π)
@@ -8,6 +6,7 @@ function createMathieuProblem(δ, ε, b0, a1; T=2π)
     τ1 = t -> 2π # if function is needed, the use τ1 = t->foo(t)
     BMx1 = DelayMX(τ1, t -> @SMatrix [0.0 0.0; b0 0.0])
     cVec = Additive(t -> @SVector [0.0, sin(4π / T * t)])
+    #AMx, [BMx1], cVec
     LDDEProblem(AMx, [BMx1], cVec)
 end;
 
@@ -21,12 +20,12 @@ method = SemiDiscretization(0, 0.05) # 3rd order semi discretization with Δt=0.
     n_steps=Int((T + 100eps(T)) ÷ method.Δt), calculate_additive=true); #The discrete mapping of the system
 
 # spectral radius ρ of the mapping matrix (ρ>1 unstable, ρ<1 stable)
-@time @show spectralRadiusOfMapping(mapping);
-@time @show spectralRadiusOfMapping(mapping_LR);
+@time @show spectralRadiusOfMapping(mapping);#traditional multiplication based mapping (SLOW)
+@time @show spectralRadiusOfMapping(mapping_LR);# Multiplactaion free mapping with Left and Right matrices (FAST)
 
 # stationary solution of the hayes equation (equilibrium position)
-@time fp = fixPointOfMapping(mapping);
-@time fp_LR = fixPointOfMapping(mapping_LR);
+@time fp = fixPointOfMapping(mapping);#traditional multiplication based mapping (SLOW)
+@time fp_LR = fixPointOfMapping(mapping_LR);# Multiplactaion free mapping with Left and Right matrices (FAST)
 
 
 
@@ -48,25 +47,28 @@ plot!(0.0:method.Δt:T, sin.(4pi * (0.0:method.Δt:T) ./ T), label=L"sin(4\pi  t
 #--------- Stability map ----------
 using MDBM
 
-a1 = 0.1;
+a1 = 0.01;
 ε = 1;
 τmax = 2π;
 T = 1π;
 method = SemiDiscretization(2, T / 40);
 
 foo(δ, b0) = log(spectralRadiusOfMapping(DiscreteMapping_LR(createMathieuProblem(δ, ε, b0, a1, T=T), method, τmax,
-        n_steps=Int((T + 100eps(T)) ÷ method.Δt)), nev=1, tol=1e-3)); # No additive term calculated
+        n_steps=Int((T + 100eps(T)) ÷ method.Δt)), nev=1, tol=1e-3))::Float64; # No additive term calculated
+@time foo(2.2, 3.3) # test the function for a single point
 
-axis = [Axis(-1:0.5:5.0, :δ),
-    Axis(-2:0.5:1.5, :b0)]
 
-iteration = 4;
-@time stab_border_points = getinterpolatedsolution(solve!(MDBM_Problem(foo, axis), iteration));
+
+axis = [Axis(-1.0:0.5:5.0, :δ),
+    Axis(-2.0
+         :0.5:1.5, :b0)]
+
+iteration = 5;
+@time stab_border_points = getinterpolatedsolution(MDBM.solve!(MDBM_Problem(foo, axis), iteration));#internal ARPACK eigen solver is used, which generate confilts with the multithreading of mdbm, so doThreadprecomp is set to false to avoid that.
 
 scatter(stab_border_points...,
     label="", title="Stability border of the delay Mathieu equation", xlabel=L"\delta", ylabel=L"b_0",
     guidefontsize=14, tickfont=font(10), markersize=2, markerstrokewidth=0)
-
 
 
 #--------- Stability map of the Mathieu equation (no delay)----------
@@ -79,13 +81,13 @@ b0 = 0.0
 method = SemiDiscretization(2, T / 40);
 
 foo(δ, ε) = log(spectralRadiusOfMapping(DiscreteMapping_LR(createMathieuProblem(δ, ε, b0, a1, T=T), method, τmax,
-        n_steps=Int((T + 100eps(T)) ÷ method.Δt)), nev=1, tol=1e-4)); # No additive term calculated
+        n_steps=Int((T + 100eps(T)) ÷ method.Δt)), nev=1, tol=1e-4))::Float64; # No additive term calculated
 
 axis = [Axis(-2:1:5.0, :δ),
     Axis(-0.01:1:5, :ε)]
 
 iteration = 5;
-@time stab_border_points = getinterpolatedsolution(solve!(MDBM_Problem(foo, axis), iteration));
+@time stab_border_points = getinterpolatedsolution(MDBM.solve!(MDBM_Problem(foo, axis), iteration));#internal ARPACK eigen solver is used, which generate confilts with the multithreading of mdbm, so doThreadprecomp is set to false to avoid that.
 
 scatter(stab_border_points...,
     label="", title="Stability border of the delay Mathieu equation", xlabel=L"\delta", ylabel=L"\epsilon",
@@ -94,21 +96,21 @@ scatter(stab_border_points...,
 
 #--------- 3D stability map ----------
 using MDBM
-plotly()
+#plotlyjs()
 a1 = 0.01;
 τmax = 2π;
 T = 2π;
-method = SemiDiscretization(2, T / 40);
+method = SemiDiscretization(2, T / 40)
 
 foo(δ, b0, ε) = log(spectralRadiusOfMapping(DiscreteMapping_LR(createMathieuProblem(δ, ε, b0, a1, T=T), method, τmax,
-        n_steps=Int((T + 100eps(T)) ÷ method.Δt)), nev=1, tol=1e-4)); # No additive term calculated
+        n_steps=Int((T + 100eps(T)) ÷ method.Δt)), nev=1, tol=1e-4))::Float64; # No additive term calculated
 
 axis = [Axis(-2:0.5:5.0, :δ),
     Axis(-2:0.5:1.5, :b0),
     Axis(-0.01:0.5:5, :ε)]
 
 iteration = 2;
-@time stab_border_points = getinterpolatedsolution(solve!(MDBM_Problem(foo, axis), iteration));
+@time stab_border_points = getinterpolatedsolution(MDBM.solve!(MDBM_Problem(foo, axis), iteration));
 
 scatter(stab_border_points...,
     label="", title="Stability border of the delay Mathieu equation", xlabel=L"\delta", ylabel=L"b_0", zlabel=L"\epsilon",
