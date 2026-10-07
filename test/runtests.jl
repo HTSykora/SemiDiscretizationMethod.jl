@@ -47,3 +47,4 @@ function tests()
     end
 end
 tests()
+include("test_LRmapping.jl")
