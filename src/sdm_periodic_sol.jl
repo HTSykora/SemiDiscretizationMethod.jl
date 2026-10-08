@@ -93,8 +93,9 @@ function get_periodic_solution(mappLR, d::Int, order::Int=1)
     # Calculate the raw fixed point vector y* = (L - R) \ v
     y_raw = (mappLR.LmappingMX - mappLR.RmappingMX) \ Vector(mappLR.mappingVs[1])
     
-    # In LR mapping, the number of steps is length(y_raw) / d
-    p_steps = div(length(y_raw), d)
+    # y_raw = [x(T), x(T-Δt), ...] has max(p, r̂+1) blocks; for T ≤ τmax it extends beyond one
+    # period, so the number of steps cannot be inferred from length(y_raw).
+    p_steps = mappLR.n_steps
     T_period = mappLR.ts[end] - mappLR.ts[1]
     
     # We reconstruct the solution in forward time order: [0, Δt, ..., T]

@@ -4,6 +4,7 @@ struct DiscreteMapping_LR{tT,mxT,vT,sysT}
     RmappingMX::mxT
     mappingVs::Vector{vT}
     A_fixpoint::sysT # Pre-assembled (L - R) matrix for fast fixed point solve
+    n_steps::Int # p: the state has max(p, r̂+1) blocks, only the first p span one period
 end
 
 ###############################################################################
@@ -16,23 +17,14 @@ function DiscreteMapping_LR(LDDEP::AbstractLDDEProblem, method::DiscretizationMe
     DiscreteMapping_LR(DiscreteMappingSteps_LR(result)...)
 end
 
-function rangeshift_LR!(rst::AbstractResult{d}) where {d}
-    #for (iIPR, smx_IPR) in enumerate(rst.subMXs)#P,R1,R2....
-    for smx_IPR in rst.subMXs#P,R1,R2....
-        for (it, smx) in enumerate(smx_IPR) #each time
-            for iloc in eachindex(smx.ranges, smx.MXs)
-                smx.ranges[iloc] =
-                    (smx.ranges[iloc][1] .- (it - 1 - (rst.n_steps - 1)) * d,
-                        smx.ranges[iloc][2] .- (it - 1 - (rst.n_steps)) * d)
-            end
-        end
-    end
+# Position of the step-`it` submatrix in the stacked [x_p,...,x_1 | x_0,x_-1,...] system.
+# Must not mutate `rst`: the SubMX objects (and their `ranges` vectors) are shared between
+# time steps for constant delays and for CyclicVector (periodic) results.
+@inline function rangeshift_LR(range_pair::Tuple{UnitRange{Int},UnitRange{Int}}, it::Integer, p::Integer, d::Integer)
+    (range_pair[1] .+ (p - it) * d, range_pair[2] .+ (p - it + 1) * d)
 end
 
-
 function DiscreteMappingSteps_LR(rst::AbstractResult{d}) where {d}
-    rangeshift_LR!(rst)
-    
     p = rst.n_steps
     r = rst.n ÷ d
     rhat = maximum([r, p - 1])
@@ -42,9 +34,9 @@ function DiscreteMappingSteps_LR(rst::AbstractResult{d}) where {d}
     nelements_L_core = 0
     nelements_R_core = 0
     for smx_IPR in rst.subMXs
-        for smx in smx_IPR
+        for (it, smx) in enumerate(smx_IPR)
             for range_pair in smx.ranges
-                cols = range_pair[2]
+                cols = rangeshift_LR(range_pair, it, p, d)[2]
                 if cols[end] <= p * d
                     nelements_L_core += d * d
                 else
@@ -81,10 +73,9 @@ function DiscreteMappingSteps_LR(rst::AbstractResult{d}) where {d}
     currR = 1
     currA = 1
     for smx_IPR in rst.subMXs
-        for smx in smx_IPR
+        for (it, smx) in enumerate(smx_IPR)
             for (range_pair, mx) in zip(smx.ranges, smx.MXs)
-                rows = range_pair[1]
-                cols = range_pair[2]
+                rows, cols = rangeshift_LR(range_pair, it, p, d)
                 for (c_idx, col_idx) in enumerate(cols)
                     if col_idx <= p * d
                         # Unroll for d=2 if possible
@@ -166,7 +157,7 @@ function DiscreteMappingSteps_LR(rst::AbstractResult{d}) where {d}
     end
     mappingVs = [mappingV]
     
-    ([rst.ts[1], rst.ts[end]], PHILL, PHIRR, mappingVs, A_fix)
+    ([rst.ts[1], rst.ts[end]], PHILL, PHIRR, mappingVs, A_fix, p)
 end
 
 function spectralRadiusOfMapping(mappLR::DiscreteMapping_LR{tT,mxT,vT}; useKrylovKit=true, nev=1, tol=1e-6, args...)::mxT.parameters[1] where {tT,mxT,vT}

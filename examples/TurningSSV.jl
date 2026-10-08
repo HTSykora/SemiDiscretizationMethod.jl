@@ -46,7 +46,7 @@ method=SemiDiscretization(1,0.1) # 1st order semi discretization with Δt=0.05
 @time fixPointOfMapping(mappingLR); # stationary solution of the system (equilibrium position)
 
 #Plotting one segment based on the Plot recipe for the PeriodicSolution structure
-sol_periodic = get_periodic_solution(mapping_LR,2)# the dimension of the system must be provided
+sol_periodic = get_periodic_solution(mappingLR,2)# the dimension of the system must be provided
 fig=plot( sol_periodic, vars=1, label="MF-SD Periodic (order 1)", linewidth=2)
 display(fig)
 

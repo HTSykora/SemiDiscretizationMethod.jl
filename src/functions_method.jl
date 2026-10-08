@@ -104,7 +104,9 @@ function (method::SemiDiscretization{<:NumericSD})(B::DelayMX{d,<:Real,mT}, rst:
 end
 
 function (method::SemiDiscretization{<:NumericSD})(B::DelayMX{d,<:Function,mT}, rst::AbstractResult) where {d,mT}
-    τis = [quadgk(B.τ, rst.ts[i], rst.ts[i + 1])[1] / method.Δt for i in 1:rst.n_steps]
+    # Divide by the actual step length: ts[i+1]-ts[i] differs from Δt by rounding, which would
+    # push a constant τ with integer τ/Δt below the rOfDelay tolerance on some steps.
+    τis = [quadgk(B.τ, rst.ts[i], rst.ts[i + 1])[1] / (rst.ts[i + 1] - rst.ts[i]) for i in 1:rst.n_steps]
     method(τis, B, rst)
 end
 
