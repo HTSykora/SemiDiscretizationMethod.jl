@@ -4,6 +4,7 @@ struct DiscreteMapping_LR{tT,mxT,vT,sysT}
     RmappingMX::mxT
     mappingVs::Vector{vT}
     A_fixpoint::sysT # Pre-assembled (L - R) matrix for fast fixed point solve
+    n_steps::Int # p: the state has max(p, r̂+1) blocks, only the first p span one period
 end
 
 ###############################################################################
@@ -156,7 +157,7 @@ function DiscreteMappingSteps_LR(rst::AbstractResult{d}) where {d}
     end
     mappingVs = [mappingV]
     
-    ([rst.ts[1], rst.ts[end]], PHILL, PHIRR, mappingVs, A_fix)
+    ([rst.ts[1], rst.ts[end]], PHILL, PHIRR, mappingVs, A_fix, p)
 end
 
 function spectralRadiusOfMapping(mappLR::DiscreteMapping_LR{tT,mxT,vT}; useKrylovKit=true, nev=1, tol=1e-6, args...)::mxT.parameters[1] where {tT,mxT,vT}

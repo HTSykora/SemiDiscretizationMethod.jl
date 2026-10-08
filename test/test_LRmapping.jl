@@ -152,4 +152,29 @@ end
         xs = reduce(vcat, [vec(Xs[I0s+nper*p*m-j*m]) for j in 0:nb-1])
         @test maximum(abs, zl[1:2nb] - xs) < (order == 1 ? 5e-4 : 2e-4)   # 1.1e-4 / 4.2e-5 here
     end
+
+    @testset "get_periodic_solution for T = τ + $k Δt (T ≤ τmax included), order $order" for order in (1, 2), k in (0, 1, 3)
+        # k = 0 is the default n_steps (T = τmax): the LR state then extends beyond one period
+        N = 100
+        Δt = τ / N
+        p = N + k
+        T = p * Δt
+        f0, f2, φ = 1.0, 0.5, 0.3
+        c = t -> @SVector [0.0, f0 + f2 * sin(2π * t / T + φ)]
+        prob = LDDEProblem(ProportionalMX(A), [DelayMX(τ, B)], Additive(c))
+        method = SemiDiscretization(order, Δt)
+        mp = k == 0 ? DiscreteMapping_LR(prob, method, τ; calculate_additive = true) :
+             DiscreteMapping_LR(prob, method, τ; n_steps = p, calculate_additive = true)
+        @test mp.n_steps == p
+        sol = get_periodic_solution(mp, prob, method)
+        @test length(sol.t) == p + 1 && sol.T ≈ T
+        z = fixPointOfMapping(mp)
+        @test maximum(abs, reduce(vcat, [sol(mod(-j * Δt, T)) for j in 0:p-1]) - z[1:2p]) < 1e-10
+
+        H(s) = inv(s * I - Matrix(A) - Matrix(B) * exp(-s * τ))
+        xp(t) = real(-(Matrix(A + B)) \ [0.0, f0] + H(2π / T * im) * [0.0, -im * f2 * exp(im * φ)] * exp(2π / T * im * t))
+        tm = [(j + 0.5) * Δt for j in 0:p-1]
+        @test maximum(abs(sol(t)[1] - xp(t)[1]) for t in tm) < (order == 1 ? 2e-2 : 1e-3)   # 4.1e-3…6.6e-3 / 1.3e-4…2.0e-4 here (max|x1| = 6)
+        @test maximum(norm(sol(t + T) - sol(t)) for t in tm) < 1e-12
+    end
 end
